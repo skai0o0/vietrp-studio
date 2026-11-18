@@ -67,7 +67,9 @@ def test_deploy_docs_and_env_example_contain_no_secrets_or_quick_tunnels() -> No
     assert "VIETRP_SERVER_PEPPER=" in env_example
     assert "VIETRP_SESSION_SECRET=" in env_example
     assert "sk-or-v1-" not in env_example
-    assert "trycloudflare.com" not in readme
+    assert "cloudflared tunnel --url" not in readme
+    assert "Không dùng quick tunnel" in readme
+    assert "cloudflared service install" in readme
     assert "sudo git clone" in readme
     assert "/opt/vietrp/src/frontend" in readme
     assert not re.search(r"sk-or-v1-[A-Za-z0-9]{20,}", readme + env_example)

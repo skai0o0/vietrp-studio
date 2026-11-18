@@ -1,7 +1,7 @@
 # VietRP Studio: progress and handoff
 
 > This is the single file a fresh lead session reads to continue the work. **Update it after every WP finishes** (status, report summary, open issues), before doing anything else.
-> Last updated: 2026-11-19 ~01:14 (UTC+7). **P4 & P5 DONE.** P6 `WP-B6` DONE (`556` BE tests), `gen:types` synced, `WP-F6` running. Next: P7.
+> Last updated: 2026-11-19 ~02:20 (UTC+7). **P0–P7 DONE.** Full BE (`573`) & FE (`180`) gates + live OpenRouter E2E (`P2-P7`) verified.
 
 ## How to resume (lead procedure)
 
@@ -170,5 +170,14 @@ Plan: `docs/P6-work-packages.md`.
 - `settings.lorebook.book_ids` (null = card/world links from `pack`, exposed as `ChatOut.default_lorebook_ids`); edited in chat settings with the same picker; "Về lại lorebook của card" resets to null. Books are still loaded through `load_books` (own or public only).
 - Gates: BE 569, FE 176. Not visually checked in the browser.
 
+### P7 · Deploy, Mobile & E-ink Verification, and Live OpenRouter E2E: DONE (2026-11-19)
+Plan: `docs/P7-work-packages.md`.
+
+| WP | Owner role | Status | Notes |
+|---|---|---|---|
+| D7 Deploy artifacts & tests | lead | DONE (`deploy/README.md` paths synced with repo root `vietrp-studio/`; verified `systemd/vietrp-api.service` `127.0.0.1:7880 --workers 1 --forwarded-allow-ips=127.0.0.1`, `ExecStartPre` `alembic upgrade head`, hardening, `vietrp-backup.{service,timer}`, `backup.sh`/`restore.sh`/`pg_env.sh`/`env.example`, Cloudflare Tunnel Zero Trust docs without quick tunnels; 4 tests in `tests/test_deploy_artifacts.py`) | P7 |
+| UI7 Mobile 375px & E-ink tests | lead | DONE (verified `oled-neon.css` `#000` base & `e-ink.css` `--glow: none`, serif `--font-content`, `--motion: 0`, token-bar E-ink steps, `useReducedMotion` / `useMotionKit`, and `375px` mobile `BottomNav` + `ChatInput` + `ReasoningBlock` in `src/styles/themeEinkMobile.test.tsx`) | P7 |
+| QA7 Live E2E & final gates | lead | DONE (`frontend/dist` built; `smoke_single_chat.py`, `smoke_world_chat.py`, and `smoke_live_openrouter.py` PASSED against live OpenRouter across P2–P7 including Writer reasoning SSE, `default_lorebook_ids`, World Chat `StateKeeper` + Bonds, P4 Archivist `/summarize`, P5 actions/commands, P6 Card Judge + Creator 2-step SSE, and P7 FastAPI SPA `/`; BE `573` tests + ruff + mypy strict 113 files; FE `180` tests across 22 files + eslint + tsc + build; rule greps & read-only reference checks clean) | P7 |
+
 ### Later phases
-P6 creator · P7 deploy. See KIEN-TRUC §13.
+P0–P7 complete (`KIEN-TRUC-VIETRP.md` §13). Ready for Debian 12 production rollout via `deploy/README.md`.
