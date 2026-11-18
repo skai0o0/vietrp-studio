@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ImportButton } from "@/features/io";
 import { t } from "@/i18n";
@@ -14,6 +14,11 @@ interface LorebookPickerProps {
 /** Multi-select of the vault's lorebooks (checkbox list). */
 export function LorebookPicker({ selected, onChange }: LorebookPickerProps) {
   const baseId = useId();
+  // Several files imported in one go call `onImported` before the parent re-renders: keep a running list.
+  const latest = useRef<readonly string[]>(selected);
+  useEffect(() => {
+    latest.current = selected;
+  }, [selected]);
   const { readOnly } = useFormState();
   const query = useLorebooks();
   const books = query.data?.pages.flatMap((page) => page.items) ?? [];
@@ -27,7 +32,10 @@ export function LorebookPicker({ selected, onChange }: LorebookPickerProps) {
   // A SillyTavern World Info file imported from here is linked right away (saved with the form).
   function onImported(result: ImportResult): void {
     const id = result.lorebook?.id;
-    if (id && !selected.includes(id)) onChange([...selected, id]);
+    if (!id || latest.current.includes(id)) return;
+    const next = [...latest.current, id];
+    latest.current = next;
+    onChange(next);
   }
 
   const importRow = readOnly ? null : (

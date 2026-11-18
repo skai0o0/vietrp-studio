@@ -39,6 +39,55 @@ async function pickFile(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("ImportButton", () => {
+  it("imports several files one by one and reports each result", async () => {
+    const user = userEvent.setup();
+    const onImported = vi.fn();
+    fetchMock
+      .mockResolvedValueOnce(
+        json(
+          {
+            kind: "lorebook",
+            lorebook: { id: "l1", name: "Sách A" },
+            warnings: [],
+            needs_age: false,
+          },
+          201,
+        ),
+      )
+      .mockResolvedValueOnce(json({ error: { code: "invalid_json", message: "x" } }, 422))
+      .mockResolvedValueOnce(
+        json(
+          {
+            kind: "lorebook",
+            lorebook: { id: "l2", name: "Sách B" },
+            warnings: [],
+            needs_age: false,
+          },
+          201,
+        ),
+      );
+    wrap(<ImportButton onImported={onImported} />);
+    await user.click(screen.getByRole("button", { name: t("io.import.button") }));
+    await user.upload(screen.getByTestId("import-input"), [
+      new File(["{}"], "a.json", { type: "application/json" }),
+      new File(["x"], "broken.json", { type: "application/json" }),
+      new File(["{}"], "b.json", { type: "application/json" }),
+    ]);
+
+    expect(
+      await screen.findByText(t("io.import.batch.summary", { done: 2, failed: 1 })),
+    ).toBeInTheDocument();
+    const rows = screen.getAllByTestId("import-batch-row");
+    expect(rows).toHaveLength(3);
+    expect(within(rows[0] as HTMLElement).getByText("Sách A")).toBeInTheDocument();
+    expect(within(rows[1] as HTMLElement).getByRole("alert")).toHaveTextContent(
+      errorMessage("invalid_json"),
+    );
+    expect(within(rows[2] as HTMLElement).getByText("Sách B")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(onImported).toHaveBeenCalledTimes(2);
+  });
+
   it("shows kind, warnings and the needs-age call-out linking to the editor", async () => {
     const user = userEvent.setup();
     const onImported = vi.fn();

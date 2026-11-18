@@ -13,6 +13,7 @@ import { errorMessage, t } from "@/i18n";
 import { ApiError } from "@/lib/apiClient";
 import { cn } from "@/lib/cn";
 import type { ImportResult } from "@/types/library";
+import { ImportBatchList, type BatchItem } from "./ImportBatchList";
 import { ImportResultPanel } from "./ImportResultPanel";
 
 const ACCEPT = ".json,.png,application/json,image/png";
@@ -28,6 +29,8 @@ export function ImportDialog({ onClose, onImported }: ImportDialogProps) {
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState("");
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [batch, setBatch] = useState<BatchItem[] | null>(null);
+  const [batchRunning, setBatchRunning] = useState(false);
 
   function upload(file: File | undefined): void {
     if (!file) return;
@@ -40,15 +43,47 @@ export function ImportDialog({ onClose, onImported }: ImportDialogProps) {
     });
   }
 
+  function patchItem(index: number, change: Partial<BatchItem>): void {
+    setBatch(
+      (items) => items?.map((item, i) => (i === index ? { ...item, ...change } : item)) ?? null,
+    );
+  }
+
+  /** Several files: upload one after another so each gets its own result or error. */
+  async function uploadMany(files: File[]): Promise<void> {
+    setBatch(
+      files.map((file, i) => ({ key: `${i}-${file.name}`, name: file.name, status: "waiting" })),
+    );
+    setBatchRunning(true);
+    for (const [index, file] of files.entries()) {
+      patchItem(index, { status: "uploading" });
+      try {
+        const data = await importFile.mutateAsync(file);
+        patchItem(index, { status: "done", result: data });
+        onImported?.(data);
+      } catch (err) {
+        patchItem(index, { status: "error", errorCode: err instanceof ApiError ? err.code : null });
+      }
+    }
+    setBatchRunning(false);
+  }
+
+  function handleFiles(list: FileList | null | undefined): void {
+    const files = Array.from(list ?? []);
+    if (files.length > 1) void uploadMany(files);
+    else upload(files[0]);
+  }
+
   function onDrop(event: DragEvent<HTMLDivElement>): void {
     event.preventDefault();
     setDragging(false);
-    upload(event.dataTransfer.files[0]);
+    handleFiles(event.dataTransfer.files);
   }
 
   function reset(): void {
     importFile.reset();
     setResult(null);
+    setBatch(null);
     setFileName("");
   }
 
@@ -61,7 +96,14 @@ export function ImportDialog({ onClose, onImported }: ImportDialogProps) {
           <DialogDescription>{t("io.import.description")}</DialogDescription>
         </DialogHeader>
 
-        {result ? (
+        {batch ? (
+          <ImportBatchList
+            items={batch}
+            running={batchRunning}
+            onAnother={reset}
+            onNavigate={onClose}
+          />
+        ) : result ? (
           <ImportResultPanel result={result} onAnother={reset} onNavigate={onClose} />
         ) : (
           <div className="flex flex-col gap-3">
@@ -92,12 +134,13 @@ export function ImportDialog({ onClose, onImported }: ImportDialogProps) {
                 ref={inputRef}
                 type="file"
                 accept={ACCEPT}
+                multiple
                 className="sr-only"
                 tabIndex={-1}
                 aria-hidden
                 data-testid="import-input"
                 onChange={(event) => {
-                  upload(event.target.files?.[0]);
+                  handleFiles(event.target.files);
                   event.target.value = "";
                 }}
               />

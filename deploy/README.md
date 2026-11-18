@@ -95,7 +95,7 @@ Cách khác: build frontend trên máy dev, rồi chép thư mục `frontend/dis
 
 ## 5. Lấy mã nguồn, build và triển khai
 
-Clone repo vào `/opt/vietrp/src`. Nếu repo là private, chép thư mục `vietrp-studio/` từ máy dev bằng `rsync` thay cho `git clone`:
+Clone repo vào `/opt/vietrp/src` (repo git lấy `vietrp-studio/` làm thư mục gốc). Nếu repo là private, chép thư mục `vietrp-studio/` từ máy dev vào `/opt/vietrp/src` bằng `rsync` thay cho `git clone`:
 
 ```bash
 sudo git clone <URL_REPO> /opt/vietrp/src
@@ -105,15 +105,15 @@ sudo chown -R "$USER":"$USER" /opt/vietrp/src
 Build frontend bằng tài khoản thường (không cần sudo):
 
 ```bash
-cd /opt/vietrp/src/vietrp-studio/frontend
+cd /opt/vietrp/src/frontend
 npm ci
 npm run build
 ```
 
-Chép code đã build vào thư mục triển khai. Lệnh này giữ nguyên `.venv` của backend:
+Chép code đã build vào thư mục triển khai. Lệnh này giữ nguyên `.venv` của backend (nếu bạn chép thư mục cha chứa `vietrp-studio/`, đổi `cd /opt/vietrp/src` thành `cd /opt/vietrp/src/vietrp-studio`):
 
 ```bash
-cd /opt/vietrp/src/vietrp-studio
+cd /opt/vietrp/src
 sudo rsync -a --delete --exclude '.venv' --exclude '__pycache__' backend/ /opt/vietrp/backend/
 sudo rsync -a --delete frontend/dist/ /opt/vietrp/frontend/dist/
 sudo rsync -a --delete deploy/ /opt/vietrp/deploy/
@@ -234,10 +234,10 @@ sudo systemctl start vietrp-api
 ```bash
 # 1. Lấy mã mới và build frontend
 cd /opt/vietrp/src && git pull
-cd /opt/vietrp/src/vietrp-studio/frontend && npm ci && npm run build
+cd /opt/vietrp/src/frontend && npm ci && npm run build
 
 # 2. Chép vào thư mục triển khai
-cd /opt/vietrp/src/vietrp-studio
+cd /opt/vietrp/src
 sudo rsync -a --delete --exclude '.venv' --exclude '__pycache__' backend/ /opt/vietrp/backend/
 sudo rsync -a --delete frontend/dist/ /opt/vietrp/frontend/dist/
 sudo rsync -a --delete deploy/ /opt/vietrp/deploy/

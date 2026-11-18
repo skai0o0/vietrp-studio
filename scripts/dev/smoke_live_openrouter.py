@@ -20,7 +20,7 @@ import httpx
 
 sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
 
-BASE_URL = "http://127.0.0.1:7880"
+BASE_URL = os.environ.get("VIETRP_SMOKE_BASE_URL", "http://127.0.0.1:7880")
 ROOT_ENV = Path(__file__).resolve().parents[3] / ".env"
 
 
@@ -157,7 +157,9 @@ def main() -> None:
             json={"mode": "single", "character_id": vy_id, "persona_id": persona_id, "greeting_index": 0},
         )
         assert sc_res.status_code == 201, sc_res.text
-        sc_id = sc_res.json()["id"]
+        sc_data = sc_res.json()
+        sc_id = sc_data["id"]
+        assert "default_lorebook_ids" in sc_data
         created_chats.append(sc_id)
 
         sc_events = _stream_turn(client, sc_id, "Chào Vy, hôm nay cậu còn nhiều giấy tờ phải soạn không?")

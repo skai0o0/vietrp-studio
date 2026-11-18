@@ -186,7 +186,12 @@ export const vi = {
       description: "Hỗ trợ file .json và .png (card SillyTavern CCv2/CCv3 hoặc định dạng VietRP).",
       drop: "Kéo thả file vào đây",
       pick: "Chọn file",
-      hint: ".json hoặc .png, tối đa 20 MB",
+      hint: ".json hoặc .png, tối đa 20 MB mỗi file. Chọn hoặc kéo nhiều file cùng lúc được.",
+      batch: {
+        waiting: "Đang chờ…",
+        progress: "Đang nhập {done}/{total} file…",
+        summary: "Xong: {done} file thành công, {failed} file lỗi.",
+      },
       uploading: "Đang nhập {name}…",
       resultTitle: "Đã nhập xong",
       kind: {

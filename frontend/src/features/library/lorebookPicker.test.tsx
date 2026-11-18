@@ -4,11 +4,23 @@ import type { ImportResult } from "@/types/library";
 import { LorebookPicker } from "./form/LorebookPicker";
 import { json, mockApi, renderAt } from "./testHelpers";
 
-const imported = { kind: "lorebook", lorebook: { id: "lb-new" }, warnings: [], needs_age: false };
+const imported = (id: string) => ({
+  kind: "lorebook",
+  lorebook: { id },
+  warnings: [],
+  needs_age: false,
+});
 
 vi.mock("@/features/io", () => ({
   ImportButton: ({ onImported }: { onImported?: (r: ImportResult) => void }) => (
-    <button type="button" onClick={() => onImported?.(imported as unknown as ImportResult)}>
+    <button
+      type="button"
+      onClick={() => {
+        // Two files from one batch, before the parent re-renders.
+        onImported?.(imported("lb-new") as unknown as ImportResult);
+        onImported?.(imported("lb-new2") as unknown as ImportResult);
+      }}
+    >
       import-button
     </button>
   ),
@@ -24,7 +36,7 @@ describe("LorebookPicker", () => {
     const onChange = vi.fn();
     renderAt(<LorebookPicker selected={["lb-1"]} onChange={onChange} />, "/", "/");
     fireEvent.click(await screen.findByRole("button", { name: "import-button" }));
-    expect(onChange).toHaveBeenCalledWith(["lb-1", "lb-new"]);
+    expect(onChange).toHaveBeenLastCalledWith(["lb-1", "lb-new", "lb-new2"]);
   });
 
   it("still offers import when the vault has no lorebook", async () => {
