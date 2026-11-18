@@ -61,3 +61,12 @@ async def test_retry_sends_hints_to_the_model() -> None:
     assert isinstance(done, WriterDone) and done.text == "Mai mỉm cười."
     body = json.loads(llm.requests[-1].content)
     assert body["messages"][-1]["role"] == "user" and "Bỏ lời thoại" in body["messages"][-1]["content"]
+
+
+def test_config_for_grows_the_budget_only_with_reasoning() -> None:
+    from app.agents.writer import config_for
+    from app.core.config import WRITER_REASONING_EXTRA_TOKENS
+
+    assert config_for("m", "off").max_tokens == AgentConfig().max_tokens
+    on = config_for("m", "high")
+    assert on.reasoning == "high" and on.max_tokens == AgentConfig().max_tokens + WRITER_REASONING_EXTRA_TOKENS

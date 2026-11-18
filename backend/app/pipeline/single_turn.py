@@ -61,6 +61,7 @@ from app.schemas.events import (
     DraftEvent,
     ErrorEvent,
     NoticeEvent,
+    ReasoningEvent,
     RejudgeEvent,
     ResetContentEvent,
     SpeakerEndEvent,
@@ -631,7 +632,7 @@ async def _speak(
     hold = director_on and settings.director.stream_mode == "hold_until_approved"
     writer_model_id = writer_model(settings)
     director_model = settings.models.director or DEFAULT_MODELS["director"]
-    writer_cfg = writer.AgentConfig(model=writer_model_id)
+    writer_cfg = writer.config_for(writer_model_id, settings.writer.reasoning)
     director_cfg = director.AgentConfig(model=director_model)
     character_name = ctx.card.name
 
@@ -642,15 +643,25 @@ async def _speak(
     best_text = ""
     best: director.DirectorOutcome | None = None
     attempt_text = ""
+    attempt_reasoning = ""
+    best_reasoning = ""
     stopped = False
 
     while True:
         attempt_text = ""
+        attempt_reasoning = ""
         writer_inp = writer.WriterInput(prompt, hints, rejected)
         writer_msgs = writer.build_messages(writer_inp)
         stream = writer.run(agent_ctx, writer_cfg, writer_inp)
         try:
             async for item in stream:
+                if isinstance(item, writer.WriterReasoning):
+                    if _is_set(cancel):
+                        stopped = True
+                        break
+                    attempt_reasoning += item.text
+                    yield ReasoningEvent(delta=item.text, attempt=attempt)
+                    continue
                 if not isinstance(item, writer.WriterDelta):
                     continue
                 if _is_set(cancel):
@@ -694,10 +705,11 @@ async def _speak(
         if outcome is None:
             # The Director failed: keep the draft as it is (non-critical agent).
             best_text = attempt_text if best is None else best_text
+            best_reasoning = attempt_reasoning if best is None else best_reasoning
             break
         yield DirectorEvent(**outcome.verdict.model_dump())
         if best is None or director.better(best, outcome) is outcome:
-            best, best_text = outcome, attempt_text
+            best, best_text, best_reasoning = outcome, attempt_text, attempt_reasoning
         if outcome.passed or attempt >= cfg.director_max_retries:
             break
         hints = director.fix_hints(outcome.verdict)
@@ -707,6 +719,9 @@ async def _speak(
             yield ResetContentEvent(message_id=str(message_id))
 
     final_text = attempt_text if (stopped or not director_on) else (best_text or attempt_text)
+    final_reasoning = (
+        attempt_reasoning if (stopped or not director_on) else (best_reasoning if best_text else attempt_reasoning)
+    )
 
     if (
         not stopped
@@ -717,11 +732,19 @@ async def _speak(
         yield NoticeEvent(code="writer_repeated")
         yield ResetContentEvent(message_id=str(message_id))
         rewrite_text = ""
+        rewrite_reasoning = ""
         rewrite_inp = writer.WriterInput(prompt, [ANTI_REPEAT_HINT])
         rewrite_msgs = writer.build_messages(rewrite_inp)
         stream = writer.run(agent_ctx, writer_cfg, rewrite_inp)
         try:
             async for item in stream:
+                if isinstance(item, writer.WriterReasoning):
+                    if _is_set(cancel):
+                        stopped = True
+                        break
+                    rewrite_reasoning += item.text
+                    yield ReasoningEvent(delta=item.text, attempt=attempt + 1)
+                    continue
                 if not isinstance(item, writer.WriterDelta):
                     continue
                 if _is_set(cancel):
@@ -742,6 +765,7 @@ async def _speak(
             yield event
         if rewrite_text.strip():
             final_text = rewrite_text
+            final_reasoning = rewrite_reasoning
             attempt_text = rewrite_text
             if not stopped and director_on:
                 attempt += 1
@@ -792,6 +816,8 @@ async def _speak(
         "attempts": attempt + 1,
         "turn_type": turn_type,
     }
+    if final_reasoning.strip():
+        meta["reasoning"] = final_reasoning
     if is_continue_meta:
         meta["is_continue"] = True
         meta["turn_id"] = str(uuid.uuid4())

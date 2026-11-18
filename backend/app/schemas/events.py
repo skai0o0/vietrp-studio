@@ -66,6 +66,14 @@ class DraftEvent(_Event):
     delta: str
 
 
+class ReasoningEvent(_Event):
+    """Writer reasoning ("thinking") tokens for the current speaker. `attempt` restarts the buffer on a retry."""
+
+    type: Literal["reasoning"] = "reasoning"
+    delta: str
+    attempt: int = 0
+
+
 class DirectorEvent(DirectorVerdict):
     type: Literal["director"] = "director"
 
@@ -157,6 +165,7 @@ TurnEvent = Annotated[
     PlanEvent
     | SpeakerStartEvent
     | DraftEvent
+    | ReasoningEvent
     | DirectorEvent
     | ContentEvent
     | ResetContentEvent

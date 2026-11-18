@@ -16,6 +16,7 @@ import { SelectField } from "./SelectField";
 
 const STREAM_MODES = ["draft_then_replace", "hold_until_approved"] as const;
 const LOREBOOK_MODES = ["hybrid", "keyword", "ai"] as const;
+const REASONING_EFFORTS = ["off", "auto", "low", "medium", "high"] as const;
 const WRITE_MODES = ["per_character", "single_call"] as const;
 const CHAIN_MAX_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
 
@@ -328,6 +329,25 @@ export function ChatSettingsPanel({ chatId }: { chatId: string }) {
             })
           }
         />
+      </section>
+
+      <section className="flex flex-col gap-2" aria-labelledby="cs-writer">
+        <h3 id="cs-writer" className="text-sm font-semibold">
+          {t("chatSettings.writer.title")}
+        </h3>
+        <SelectField
+          id="cs-reasoning"
+          label={t("chatSettings.writer.reasoning")}
+          value={settings.writer?.reasoning ?? "medium"}
+          options={REASONING_EFFORTS.map((effort) => ({
+            value: effort,
+            label: t(`chatSettings.reasoningEffort.${effort}`),
+          }))}
+          onChange={(value) =>
+            patch({ writer: { reasoning: value as (typeof REASONING_EFFORTS)[number] } })
+          }
+        />
+        <p className="text-xs text-muted">{t("chatSettings.writer.reasoningNote")}</p>
       </section>
 
       <section className="flex flex-col gap-3" aria-labelledby="cs-lorebook">

@@ -28,6 +28,7 @@ import type {
   PingEvent,
   PlanEvent,
   PlanSpeaker,
+  ReasoningEvent,
   RejudgeEvent,
   ResetContentEvent,
   SceneEvent,
@@ -62,6 +63,7 @@ export type {
   PresetOut,
   PromptLayer,
   PromptPreview,
+  ReasoningEvent,
   RegenerateRequest,
   SceneEvent,
   SceneState,
@@ -80,6 +82,7 @@ export type TurnStreamEvent =
   | PlanEvent
   | SpeakerStartEvent
   | DraftEvent
+  | ReasoningEvent
   | DirectorEvent
   | ContentEvent
   | ResetContentEvent

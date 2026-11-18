@@ -650,6 +650,11 @@ export const vi = {
       draft: "Bản nháp bị loại",
       none: "Không có dữ liệu cho lượt này.",
     },
+    reasoning: {
+      thinking: "Đang suy luận… {seconds}s",
+      thought: "Đã suy luận {seconds}s",
+      saved: "Suy luận của model",
+    },
     stream: {
       draft: "Bản nháp, Director đang duyệt…",
       holding: "Director đang duyệt bản viết…",
@@ -824,6 +829,13 @@ export const vi = {
       draft_then_replace: "Stream bản nháp, thay nếu bị loại",
       hold_until_approved: "Giữ lại đến khi được duyệt",
     },
+    writer: {
+      title: "Suy luận",
+      reasoning: "Mức reasoning của Writer",
+      reasoningNote:
+        "Model nghĩ trước khi viết: chậm hơn vài giây, tốn thêm token, nhưng lượt viết có chiều sâu hơn.",
+    },
+    reasoningEffort: { off: "Tắt", auto: "Tự động", low: "Thấp", medium: "Vừa", high: "Cao" },
     lorebook: { title: "Lorebook", mode: "Chế độ tra lorebook" },
     lorebookMode: { hybrid: "Hybrid", keyword: "Từ khoá", ai: "AI" },
     nsfw: {

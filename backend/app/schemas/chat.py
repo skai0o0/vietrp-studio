@@ -14,6 +14,8 @@ from app.schemas.world_state import WorldState as WorldState
 DirectorStreamMode = Literal["draft_then_replace", "hold_until_approved"]
 LorebookMode = Literal["hybrid", "keyword", "ai"]
 GroupWriteMode = Literal["per_character", "single_call"]
+# "off" disables reasoning; "auto" lets the model decide; "low" | "medium" | "high" set the effort.
+ReasoningEffort = Literal["off", "auto", "low", "medium", "high"]
 
 
 class DirectorSettings(BaseModel):
@@ -35,6 +37,12 @@ class MemorySettings(BaseModel):
     # None means "use the context length of the model" (architecture 3.1: per model).
     context_length: int | None = Field(default=None, gt=0)
     summarize_at: float = Field(default=0.8, gt=0.0, le=1.0)
+
+
+class WriterSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    reasoning: ReasoningEffort = "medium"
 
 
 class GroupSettings(BaseModel):
@@ -68,6 +76,7 @@ class ChatSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     director: DirectorSettings = Field(default_factory=DirectorSettings)
+    writer: WriterSettings = Field(default_factory=WriterSettings)
     lorebook: LorebookSettings = Field(default_factory=LorebookSettings)
     memory: MemorySettings = Field(default_factory=MemorySettings)
     group: GroupSettings = Field(default_factory=GroupSettings)

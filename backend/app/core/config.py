@@ -141,6 +141,9 @@ RESPONSE_RESERVE_TOKENS = 1024
 # --- Single-chat turn (P2 fixes) ---
 # Retries after a Director-rejected draft before the best variant is kept (architecture section 5.1: bounded loop).
 DIRECTOR_MAX_RETRIES = 2
+# Reasoning tokens share the Writer's max_tokens. A live probe (deepseek-v4.1-flash, effort=medium, 2026-11-19)
+# spent ~1,100 reasoning tokens on one turn; with the 1,500 base the reply was cut. Added on top when reasoning is on.
+WRITER_REASONING_EXTRA_TOKENS = 4000
 # Messages loaded as history for one turn; the assembler then trims to the token budget, so this only bounds the query.
 TURN_HISTORY_LIMIT = 200
 # Recent lines shown to the Orchestrator: enough context to pick a speaker without inflating the Decisions prompt.

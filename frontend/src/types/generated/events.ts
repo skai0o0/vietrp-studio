@@ -4,6 +4,7 @@ export type Event =
   | PlanEvent
   | SpeakerStartEvent
   | DraftEvent
+  | ReasoningEvent
   | DirectorEvent
   | ContentEvent
   | ResetContentEvent
@@ -35,6 +36,9 @@ export type Type1 = "speaker_start";
 export type Delta = string;
 export type Type2 = "draft";
 export type Attempt = number;
+export type Delta1 = string;
+export type Type3 = "reasoning";
+export type Attempt1 = number;
 export type HintVi = string;
 export type Id1 = string;
 export type Passed = boolean;
@@ -42,17 +46,17 @@ export type Probability = number;
 export type Criteria = DirectorCriterion[];
 export type Passed1 = boolean;
 export type Score = number;
-export type Type3 = "director";
-export type Delta1 = string;
-export type Type4 = "content";
+export type Type4 = "director";
+export type Delta2 = string;
+export type Type5 = "content";
 export type MessageId1 = string;
-export type Type5 = "reset_content";
-export type Attempt1 = number;
-export type Type6 = "rejudge";
-export type Type7 = "scene";
+export type Type6 = "reset_content";
+export type Attempt2 = number;
+export type Type7 = "rejudge";
+export type Type8 = "scene";
 export type MessageId2 = string;
 export type Stopped = boolean;
-export type Type8 = "speaker_end";
+export type Type9 = "speaker_end";
 export type VariantIdx = number;
 export type Changed = string[];
 export type AwaitingReply = string[];
@@ -75,27 +79,27 @@ export type Summary = string;
 export type SummaryUpto = number;
 export type Tension = number;
 export type Time = string;
-export type Type9 = "state";
+export type Type10 = "state";
 export type EventsAdded = number;
 export type Summary1 = string | null;
-export type Type10 = "archivist";
-export type Type11 = "bonds";
+export type Type11 = "archivist";
+export type Type12 = "bonds";
 export type Agent = string | null;
 export type Code = string;
 export type Detail = string | null;
-export type Type12 = "notice";
+export type Type13 = "notice";
 export type Agent1 = string;
 export type CompletionTokens = number;
 export type Cost = number;
 export type Model = string;
 export type PromptTokens = number;
 export type ReasoningTokens = number;
-export type Type13 = "usage";
-export type Type14 = "ping";
+export type Type14 = "usage";
+export type Type15 = "ping";
 export type MessageIds = string[];
-export type Type15 = "done";
+export type Type16 = "done";
 export type Code1 = string;
-export type Type16 = "error";
+export type Type17 = "error";
 
 /**
  * Object-rooted wrapper so the exported JSON Schema (and generated TS) has an object root.
@@ -127,12 +131,20 @@ export interface DraftEvent {
   delta: Delta;
   type?: Type2;
 }
+/**
+ * Writer reasoning ("thinking") tokens for the current speaker. `attempt` restarts the buffer on a retry.
+ */
+export interface ReasoningEvent {
+  attempt?: Attempt;
+  delta: Delta1;
+  type?: Type3;
+}
 export interface DirectorEvent {
-  attempt: Attempt;
+  attempt: Attempt1;
   criteria: Criteria;
   passed: Passed1;
   score: Score;
-  type?: Type3;
+  type?: Type4;
 }
 export interface DirectorCriterion {
   hint_vi?: HintVi;
@@ -141,26 +153,26 @@ export interface DirectorCriterion {
   probability: Probability;
 }
 export interface ContentEvent {
-  delta: Delta1;
-  type?: Type4;
+  delta: Delta2;
+  type?: Type5;
 }
 export interface ResetContentEvent {
   message_id: MessageId1;
-  type?: Type5;
+  type?: Type6;
 }
 export interface RejudgeEvent {
-  attempt: Attempt1;
-  type?: Type6;
+  attempt: Attempt2;
+  type?: Type7;
 }
 /**
  * World chat only (P3).
  */
 export interface SceneEvent {
-  delta?: Delta2;
+  delta?: Delta3;
   merged?: Merged;
-  type?: Type7;
+  type?: Type8;
 }
-export interface Delta2 {
+export interface Delta3 {
   [k: string]: unknown;
 }
 export interface Merged {
@@ -169,7 +181,7 @@ export interface Merged {
 export interface SpeakerEndEvent {
   message_id: MessageId2;
   stopped?: Stopped;
-  type?: Type8;
+  type?: Type9;
   variant_idx: VariantIdx;
 }
 /**
@@ -179,7 +191,7 @@ export interface StateEvent {
   changed?: Changed;
   confidence?: Confidence;
   state: WorldState;
-  type?: Type9;
+  type?: Type10;
 }
 export interface Confidence {
   [k: string]: number;
@@ -238,11 +250,11 @@ export interface Silence {
 export interface ArchivistEvent {
   events_added?: EventsAdded;
   summary?: Summary1;
-  type?: Type10;
+  type?: Type11;
 }
 export interface BondsEvent {
   bonds: Bonds1;
-  type?: Type11;
+  type?: Type12;
 }
 export interface Bonds1 {
   [k: string]: unknown;
@@ -251,7 +263,7 @@ export interface NoticeEvent {
   agent?: Agent;
   code: Code;
   detail?: Detail;
-  type?: Type12;
+  type?: Type13;
 }
 export interface UsageEvent {
   agent: Agent1;
@@ -260,16 +272,16 @@ export interface UsageEvent {
   model: Model;
   prompt_tokens: PromptTokens;
   reasoning_tokens?: ReasoningTokens;
-  type?: Type13;
+  type?: Type14;
 }
 export interface PingEvent {
-  type?: Type14;
+  type?: Type15;
 }
 export interface DoneEvent {
   message_ids: MessageIds;
-  type?: Type15;
+  type?: Type16;
 }
 export interface ErrorEvent {
   code: Code1;
-  type?: Type16;
+  type?: Type17;
 }

@@ -70,6 +70,7 @@ from app.schemas.events import (
     DraftEvent,
     ErrorEvent,
     NoticeEvent,
+    ReasoningEvent,
     RejudgeEvent,
     ResetContentEvent,
     SceneEvent,
@@ -544,6 +545,7 @@ class _AttemptResult:
     attempts: int = 0
     stopped: bool = False
     last_streamed_visible: str = ""
+    final_reasoning: str = ""
 
 
 async def _stream_writer_director(
@@ -568,7 +570,7 @@ async def _stream_writer_director(
     hold = director_on and settings.director.stream_mode == "hold_until_approved"
     writer_model_id = writer_model(settings)
     director_model = settings.models.director or DEFAULT_MODELS["director"]
-    writer_cfg = writer.AgentConfig(model=writer_model_id)
+    writer_cfg = writer.config_for(writer_model_id, settings.writer.reasoning)
     director_cfg = director.AgentConfig(model=director_model)
 
     attempt = 0
@@ -580,16 +582,26 @@ async def _stream_writer_director(
     best: director.DirectorOutcome | None = None
     attempt_visible = ""
     attempt_scene_raw: str | None = None
+    attempt_reasoning = ""
+    best_reasoning = ""
     stopped = False
 
     while True:
         attempt_raw = ""
+        attempt_reasoning = ""
         stream_filter = SceneStreamFilter()
         writer_inp = writer.WriterInput(prompt, hints, rejected)
         writer_msgs = writer.build_messages(writer_inp)
         stream = writer.run(agent_ctx, writer_cfg, writer_inp)
         try:
             async for item in stream:
+                if isinstance(item, writer.WriterReasoning):
+                    if _is_set(cancel):
+                        stopped = True
+                        break
+                    attempt_reasoning += item.text
+                    yield ReasoningEvent(delta=item.text, attempt=attempt)
+                    continue
                 if not isinstance(item, writer.WriterDelta):
                     continue
                 if _is_set(cancel):
@@ -645,10 +657,12 @@ async def _stream_writer_director(
         if outcome is None:
             if best is None:
                 best_visible, best_scene_raw = attempt_visible, attempt_scene_raw
+                best_reasoning = attempt_reasoning
             break
         yield DirectorEvent(**outcome.verdict.model_dump())
         if best is None or director.better(best, outcome) is outcome:
             best, best_visible, best_scene_raw = outcome, attempt_visible, attempt_scene_raw
+            best_reasoning = attempt_reasoning
         if outcome.passed or attempt >= cfg.director_max_retries:
             break
         hints = director.fix_hints(outcome.verdict)
@@ -662,6 +676,9 @@ async def _stream_writer_director(
         attempt_scene_raw if (stopped or not director_on) else (best_scene_raw if best_visible else attempt_scene_raw)
     )
     last_streamed_visible = attempt_visible
+    final_reasoning = (
+        attempt_reasoning if (stopped or not director_on) else (best_reasoning if best_visible else attempt_reasoning)
+    )
 
     if (
         not stopped
@@ -672,12 +689,20 @@ async def _stream_writer_director(
         yield NoticeEvent(code="writer_repeated")
         yield ResetContentEvent(message_id=str(stream_message_id or GROUP_SPEAKER))
         rewrite_raw = ""
+        rewrite_reasoning = ""
         rewrite_filter = SceneStreamFilter()
         rewrite_inp = writer.WriterInput(prompt, [ANTI_REPEAT_HINT])
         rewrite_msgs = writer.build_messages(rewrite_inp)
         stream = writer.run(agent_ctx, writer_cfg, rewrite_inp)
         try:
             async for item in stream:
+                if isinstance(item, writer.WriterReasoning):
+                    if _is_set(cancel):
+                        stopped = True
+                        break
+                    rewrite_reasoning += item.text
+                    yield ReasoningEvent(delta=item.text, attempt=attempt + 1)
+                    continue
                 if not isinstance(item, writer.WriterDelta):
                     continue
                 if _is_set(cancel):
@@ -710,6 +735,7 @@ async def _stream_writer_director(
         if rewrite_visible.strip():
             final_visible = rewrite_visible
             final_scene_raw = rewrite_scene_raw
+            final_reasoning = rewrite_reasoning
             last_streamed_visible = rewrite_visible
             if not stopped and director_on:
                 attempt += 1
@@ -750,6 +776,7 @@ async def _stream_writer_director(
     out.attempts = attempt + 1
     out.stopped = stopped
     out.last_streamed_visible = last_streamed_visible
+    out.final_reasoning = final_reasoning
 
 
 def _cast_for_speaker(
@@ -1087,6 +1114,8 @@ async def _world_turn(deps: WorldTurnDeps, inp: TurnInput, cancel: Any) -> Async
             if is_continue_turn and turn_id is not None:
                 meta["is_continue"] = True
                 meta["turn_id"] = turn_id
+            if idx == 0 and res.final_reasoning.strip():
+                meta["reasoning"] = res.final_reasoning
             if is_last and delta is not None:
                 meta["scene_delta"] = delta.model_dump(mode="json", exclude_unset=True)
             draft_text = (
@@ -1214,6 +1243,8 @@ async def _world_turn(deps: WorldTurnDeps, inp: TurnInput, cancel: Any) -> Async
             if is_continue_turn and turn_id is not None:
                 meta["is_continue"] = True
                 meta["turn_id"] = turn_id
+            if res.final_reasoning.strip():
+                meta["reasoning"] = res.final_reasoning
             if delta is not None:
                 meta["scene_delta"] = delta.model_dump(mode="json", exclude_unset=True)
             draft_text = (

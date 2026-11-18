@@ -21,6 +21,9 @@ export interface SpeakerTurnBuffer {
   director: DirectorEvent | null;
   directorPending: boolean;
   attempt: number;
+  /** Writer reasoning ("thinking") of the current attempt. */
+  reasoning: string;
+  reasoningAttempt: number;
   stopped: boolean;
   done: boolean;
 }
@@ -106,6 +109,8 @@ export function reduceTurn(state: TurnState, event: TurnStreamEvent): TurnState 
         director: null,
         directorPending: false,
         attempt: 0,
+        reasoning: "",
+        reasoningAttempt: 0,
         stopped: false,
         done: false,
       };
@@ -133,6 +138,16 @@ export function reduceTurn(state: TurnState, event: TurnStreamEvent): TurnState 
           buffer: e.buffer + event.delta,
           isDraft: true,
           directorPending: true,
+        })),
+      };
+    case "reasoning":
+      return {
+        ...state,
+        speakerBuffers: updateActiveBuffer(state, (e) => ({
+          ...e,
+          // A Director retry starts a new attempt: its reasoning replaces the old one.
+          reasoning: e.reasoningAttempt === event.attempt ? e.reasoning + event.delta : event.delta,
+          reasoningAttempt: event.attempt ?? 0,
         })),
       };
     case "content":

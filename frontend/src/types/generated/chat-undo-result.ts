@@ -34,6 +34,7 @@ export type Orchestrator = string | null;
 export type StateKeeper = string | null;
 export type Writer = string | null;
 export type Nsfw = boolean;
+export type Reasoning = "off" | "auto" | "low" | "medium" | "high";
 export type Title = string;
 export type UpdatedAt = string;
 export type WorldId = string | null;
@@ -84,6 +85,7 @@ export interface ChatSettings {
   memory?: MemorySettings;
   models?: AgentModels;
   nsfw?: Nsfw;
+  writer?: WriterSettings;
 }
 export interface DirectorSettings {
   enabled?: Enabled;
@@ -116,6 +118,9 @@ export interface AgentModels {
   orchestrator?: Orchestrator;
   state_keeper?: StateKeeper;
   writer?: Writer;
+}
+export interface WriterSettings {
+  reasoning?: Reasoning;
 }
 export interface State {
   [k: string]: unknown;

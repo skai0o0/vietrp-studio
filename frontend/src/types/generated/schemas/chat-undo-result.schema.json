@@ -335,6 +335,9 @@
           "default": false,
           "title": "Nsfw",
           "type": "boolean"
+        },
+        "writer": {
+          "$ref": "#/$defs/WriterSettings"
         }
       },
       "title": "ChatSettings",
@@ -426,6 +429,25 @@
         }
       },
       "title": "MemorySettings",
+      "type": "object"
+    },
+    "WriterSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "reasoning": {
+          "default": "medium",
+          "enum": [
+            "off",
+            "auto",
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Reasoning",
+          "type": "string"
+        }
+      },
+      "title": "WriterSettings",
       "type": "object"
     }
   },

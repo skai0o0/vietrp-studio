@@ -13,6 +13,7 @@ import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import type { MessageOut } from "@/types/chat";
 import { MetaDialog } from "./MetaDialog";
+import { ReasoningBlock } from "./ReasoningBlock";
 import { RpText } from "./RpText";
 import { NARRATOR_SPEAKER, USER_SPEAKER } from "./grouping";
 
@@ -110,6 +111,12 @@ export function MessageBubble({
   const isUser = message.speaker === USER_SPEAKER;
   const isNarrator = message.speaker === NARRATOR_SPEAKER;
   const isGreeting = message.seq === 0;
+  // `meta` belongs to the latest generation, so its reasoning only matches the newest variant.
+  const newestIdx = Math.max(...message.variants.map((v) => v.idx), 0);
+  const savedReasoning =
+    variant?.idx === newestIdx && typeof message.meta?.reasoning === "string"
+      ? message.meta.reasoning
+      : "";
   const alwaysShowActions = isLastInGroup || total > 1 || editing || confirmDeleteOpen;
 
   function swipeTo(nextPos: number) {
@@ -200,6 +207,7 @@ export function MessageBubble({
             </div>
           ) : (
             <>
+              {!isUser ? <ReasoningBlock text={savedReasoning} saved /> : null}
               <RpText text={variant?.content ?? ""} />
               {variant?.stopped && (
                 <span className="text-xs text-muted">({t("chat.message.stopped")})</span>

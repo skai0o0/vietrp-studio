@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import type { CastMemberSummary } from "@/types/chat";
 import type { SpeakerTurnBuffer, TurnState } from "../store";
 import { resolveSpeaker, SpeakerAvatar } from "./MessageList";
+import { ReasoningBlock } from "./ReasoningBlock";
 import { RpText } from "./RpText";
 import { NARRATOR_SPEAKER } from "./grouping";
 
@@ -68,6 +69,12 @@ function SpeakerStreamRow({
             entry.stopped && "opacity-80",
           )}
         >
+          <ReasoningBlock
+            text={entry.reasoning}
+            thinking={
+              !entry.done && !entry.stopped && entry.buffer === "" && !entry.directorPending
+            }
+          />
           {!holding && entry.buffer !== "" ? (
             <div data-draft={muted || undefined} className={cn(muted && "text-muted opacity-70")}>
               <RpText text={entry.buffer} />

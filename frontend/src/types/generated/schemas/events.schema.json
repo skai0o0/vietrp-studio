@@ -380,6 +380,32 @@
       "title": "PlanSpeaker",
       "type": "object"
     },
+    "ReasoningEvent": {
+      "additionalProperties": false,
+      "description": "Writer reasoning (\"thinking\") tokens for the current speaker. `attempt` restarts the buffer on a retry.",
+      "properties": {
+        "attempt": {
+          "default": 0,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "delta": {
+          "title": "Delta",
+          "type": "string"
+        },
+        "type": {
+          "const": "reasoning",
+          "default": "reasoning",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "delta"
+      ],
+      "title": "ReasoningEvent",
+      "type": "object"
+    },
     "RejudgeEvent": {
       "additionalProperties": false,
       "properties": {
@@ -724,6 +750,7 @@
           "notice": "#/$defs/NoticeEvent",
           "ping": "#/$defs/PingEvent",
           "plan": "#/$defs/PlanEvent",
+          "reasoning": "#/$defs/ReasoningEvent",
           "rejudge": "#/$defs/RejudgeEvent",
           "reset_content": "#/$defs/ResetContentEvent",
           "scene": "#/$defs/SceneEvent",
@@ -743,6 +770,9 @@
         },
         {
           "$ref": "#/$defs/DraftEvent"
+        },
+        {
+          "$ref": "#/$defs/ReasoningEvent"
         },
         {
           "$ref": "#/$defs/DirectorEvent"

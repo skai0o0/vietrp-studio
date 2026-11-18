@@ -158,5 +158,12 @@ Plan: `docs/P6-work-packages.md`.
 | F6 FE Creator UI & Judge panel | frontend-builder | DONE (168 FE tests across 19 files, lint/typecheck/build clean) | wave 2 |
 | Lead review | lead (Claude) | DONE (gates: BE 559 incl. 3 new, FE 168. **Safety fix:** Creator prompts had no under-18 rule; added `safety.creator_rule()` + `_shared/creator_minor_rule.j2`, sent as a system message in interview, draft_raw and format calls; fails closed; tests in `tests/agents/test_creator_safety.py`. Default `_shared/system.j2` rewritten so characters take initiative and do not end every turn with a question. Removed the dev DB password from `scripts/dev/create-dev-db.sql`. Repo initialised and pushed to GitHub) | review |
 
+### Writer reasoning (2026-11-19, lead)
+- `settings.writer.reasoning` (`off|auto|low|medium|high`, default `medium`) → OpenRouter `reasoning`; `WRITER_REASONING_EXTRA_TOKENS = 4000` added to the Writer budget when on.
+- New SSE event `reasoning {delta, attempt}` (architecture §8 and AGENTS §4.5 updated). Saved as `meta.reasoning` of the chosen attempt (single + world, per_character + single_call).
+- FE: `ReasoningBlock` (open while thinking with a seconds counter, collapsed after; saved reasoning on the newest variant), "Suy luận" select in chat settings.
+- Gates: BE 565, FE 173. Live check on a throwaway vault: reasoning starts ~1 s after `speaker_start`, reply follows ~2.5 s later. Not visually checked in the browser.
+- Follow-up: with reasoning on, Director retries make a turn ~20-25 s; consider `hold_until_approved` or fewer retries.
+
 ### Later phases
 P6 creator · P7 deploy. See KIEN-TRUC §13.

@@ -18,6 +18,7 @@ EVENT_NAMES = {
     "plan",
     "speaker_start",
     "draft",
+    "reasoning",
     "director",
     "content",
     "reset_content",
@@ -47,6 +48,7 @@ SAMPLES: list[dict[str, Any]] = [
     },
     {"type": "speaker_start", "message_id": "m1", "speaker": "vy", "seq": 2},
     {"type": "draft", "delta": "xin"},
+    {"type": "reasoning", "delta": "nghĩ", "attempt": 0},
     {
         "type": "director",
         "passed": False,

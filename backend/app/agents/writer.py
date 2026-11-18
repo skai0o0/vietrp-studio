@@ -9,7 +9,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.agents.base import AgentContext
-from app.llm.chat import ChatParams, ContentDelta, Finish
+from app.core.config import WRITER_REASONING_EXTRA_TOKENS
+from app.llm.chat import ChatParams, ContentDelta, Finish, ReasoningDelta
 from app.llm.defaults import DEFAULT_MODELS
 from app.llm.usage import Usage
 from app.pipeline.prompt_assembler import AssembledPrompt
@@ -41,12 +42,25 @@ class WriterDelta(BaseModel):
     text: str
 
 
+class WriterReasoning(BaseModel):
+    text: str
+
+
 class WriterDone(BaseModel):
     """Last item of a completed stream. A stream closed early (stop) never yields it: keep the deltas."""
 
     text: str
     finish_reason: str = ""
     usage: Usage | None = None
+    reasoning: str = ""
+
+
+def config_for(model: str, reasoning: str) -> AgentConfig:
+    """Writer config for a chat: reasoning tokens share max_tokens, so the budget grows when reasoning is on."""
+    base = AgentConfig(model=model, reasoning=reasoning)
+    if reasoning != "off":
+        base.max_tokens += WRITER_REASONING_EXTRA_TOKENS
+    return base
 
 
 def build_messages(inp: WriterInput) -> list[dict[str, Any]]:
@@ -64,12 +78,15 @@ def build_messages(inp: WriterInput) -> list[dict[str, Any]]:
     return messages
 
 
-async def run(ctx: AgentContext, cfg: AgentConfig, inp: WriterInput) -> AsyncIterator[WriterDelta | WriterDone]:
+async def run(
+    ctx: AgentContext, cfg: AgentConfig, inp: WriterInput
+) -> AsyncIterator[WriterDelta | WriterReasoning | WriterDone]:
     """Stream the draft. Closing the iterator early cancels the upstream stream and still records usage."""
     params = ChatParams(
         temperature=cfg.temperature, top_p=cfg.top_p, max_tokens=cfg.max_tokens, reasoning=cfg.reasoning
     )
     parts: list[str] = []
+    thoughts: list[str] = []
     reason = ""
     usage: Usage | None = None
     stream = ctx.llm.stream(AGENT_ID, cfg.model, build_messages(inp), params)
@@ -78,10 +95,13 @@ async def run(ctx: AgentContext, cfg: AgentConfig, inp: WriterInput) -> AsyncIte
             if isinstance(event, ContentDelta):
                 parts.append(event.text)
                 yield WriterDelta(text=event.text)
+            elif isinstance(event, ReasoningDelta):
+                thoughts.append(event.text)
+                yield WriterReasoning(text=event.text)
             elif isinstance(event, Finish):
                 reason = event.reason
             elif isinstance(event, Usage):
                 usage = event
     finally:
         await stream.aclose()  # type: ignore[attr-defined]
-    yield WriterDone(text="".join(parts), finish_reason=reason, usage=usage)
+    yield WriterDone(text="".join(parts), finish_reason=reason, usage=usage, reasoning="".join(thoughts))
