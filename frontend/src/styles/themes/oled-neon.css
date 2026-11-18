@@ -1,0 +1,20 @@
+/* OLED Neon: true black base, neon accents. Palette follows viet-rp-glow. */
+[data-theme="oled-neon"] {
+  color-scheme: dark;
+  --bg: 0 0 0;
+  --surface: 10 10 10;
+  --surface-2: 18 18 18;
+  --border: 30 30 30;
+  --text: 245 245 247;
+  --text-muted: 150 150 160;
+  --accent: 176 38 255;
+  --accent-2: 0 240 255;
+  --accent-fg: 255 255 255;
+  --danger: 255 38 100;
+  --focus: 0 240 255;
+  --glow: 0 0 10px rgb(176 38 255 / 0.4), 0 0 20px rgb(176 38 255 / 0.2);
+  --radius: 0.75rem;
+  --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-content: "Be Vietnam Pro", system-ui, sans-serif;
+  --motion: 1;
+}

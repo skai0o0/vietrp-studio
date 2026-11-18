@@ -1,0 +1,5 @@
+{% if quiet %}
+{% for q in quiet %}{{ q.name }}: có mặt {{ q.turns }} lượt mà chưa nói{% if not loop.last %}; {% endif %}{% endfor %}
+{% else %}
+không ai
+{% endif %}

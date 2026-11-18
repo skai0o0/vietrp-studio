@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "agent": {
+      "enum": [
+        "orchestrator",
+        "writer",
+        "director",
+        "state_keeper",
+        "archivist",
+        "creator",
+        "card_judge",
+        "bond_drafter",
+        "bond_selector"
+      ],
+      "title": "Agent",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "layers": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Layers",
+      "type": "object"
+    },
+    "name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent",
+    "name",
+    "id",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "PresetOut",
+  "type": "object"
+}

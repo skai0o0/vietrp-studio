@@ -1,0 +1,1 @@
+{"model":"microsoft/microsoft-decision-1","provider":"TestProv","usage":{"cost":0.0002,"prompt_tokens":400,"completion_tokens":10},"answers":{"speaker":{"choice":"mai","confidence":0.82,"probabilities":{"mai":0.82,"narrator":0.18}},"lore__a":{"noul":0.73},"tension":{"score":2.6}}}

@@ -1,0 +1,798 @@
+{
+  "$defs": {
+    "ArchivistEvent": {
+      "additionalProperties": false,
+      "description": "Used from P4.",
+      "properties": {
+        "events_added": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Events Added",
+          "type": "integer"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Summary"
+        },
+        "type": {
+          "const": "archivist",
+          "default": "archivist",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "ArchivistEvent",
+      "type": "object"
+    },
+    "BondsEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "bonds": {
+          "additionalProperties": true,
+          "title": "Bonds",
+          "type": "object"
+        },
+        "type": {
+          "const": "bonds",
+          "default": "bonds",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bonds"
+      ],
+      "title": "BondsEvent",
+      "type": "object"
+    },
+    "CharacterSceneState": {
+      "additionalProperties": false,
+      "description": "Per-character free-form scene fields managed via `<scene>` blocks or manual edits.",
+      "properties": {
+        "condition": {
+          "default": "",
+          "title": "Condition",
+          "type": "string"
+        },
+        "holding": {
+          "default": "",
+          "title": "Holding",
+          "type": "string"
+        },
+        "mood": {
+          "default": "",
+          "title": "Mood",
+          "type": "string"
+        },
+        "outfit": {
+          "default": "",
+          "title": "Outfit",
+          "type": "string"
+        },
+        "pose": {
+          "default": "",
+          "title": "Pose",
+          "type": "string"
+        }
+      },
+      "title": "CharacterSceneState",
+      "type": "object"
+    },
+    "ContentEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "delta": {
+          "title": "Delta",
+          "type": "string"
+        },
+        "type": {
+          "const": "content",
+          "default": "content",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "delta"
+      ],
+      "title": "ContentEvent",
+      "type": "object"
+    },
+    "DirectorCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "hint_vi": {
+          "default": "",
+          "title": "Hint Vi",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "probability",
+        "passed"
+      ],
+      "title": "DirectorCriterion",
+      "type": "object"
+    },
+    "DirectorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "minimum": 0,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/DirectorCriterion"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "type": {
+          "const": "director",
+          "default": "director",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "passed",
+        "score",
+        "criteria",
+        "attempt"
+      ],
+      "title": "DirectorEvent",
+      "type": "object"
+    },
+    "DoneEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "message_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Message Ids",
+          "type": "array"
+        },
+        "type": {
+          "const": "done",
+          "default": "done",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message_ids"
+      ],
+      "title": "DoneEvent",
+      "type": "object"
+    },
+    "DraftEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "delta": {
+          "title": "Delta",
+          "type": "string"
+        },
+        "type": {
+          "const": "draft",
+          "default": "draft",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "delta"
+      ],
+      "title": "DraftEvent",
+      "type": "object"
+    },
+    "ErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "type": {
+          "const": "error",
+          "default": "error",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "ErrorEvent",
+      "type": "object"
+    },
+    "NoticeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "type": {
+          "const": "notice",
+          "default": "notice",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "NoticeEvent",
+      "type": "object"
+    },
+    "PingEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "ping",
+          "default": "ping",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "PingEvent",
+      "type": "object"
+    },
+    "PlanEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "card_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Card Fields",
+          "type": "array"
+        },
+        "lore_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Lore Ids",
+          "type": "array"
+        },
+        "speakers": {
+          "items": {
+            "$ref": "#/$defs/PlanSpeaker"
+          },
+          "title": "Speakers",
+          "type": "array"
+        },
+        "turn_type": {
+          "title": "Turn Type",
+          "type": "string"
+        },
+        "type": {
+          "const": "plan",
+          "default": "plan",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_type",
+        "speakers"
+      ],
+      "title": "PlanEvent",
+      "type": "object"
+    },
+    "PlanSpeaker": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "character",
+            "narrator"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "order": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        },
+        "sentences": {
+          "minimum": 0,
+          "title": "Sentences",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "sentences"
+      ],
+      "title": "PlanSpeaker",
+      "type": "object"
+    },
+    "RejudgeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "minimum": 0,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "type": {
+          "const": "rejudge",
+          "default": "rejudge",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt"
+      ],
+      "title": "RejudgeEvent",
+      "type": "object"
+    },
+    "ResetContentEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "reset_content",
+          "default": "reset_content",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message_id"
+      ],
+      "title": "ResetContentEvent",
+      "type": "object"
+    },
+    "SceneEvent": {
+      "additionalProperties": false,
+      "description": "World chat only (P3).",
+      "properties": {
+        "delta": {
+          "additionalProperties": true,
+          "title": "Delta",
+          "type": "object"
+        },
+        "merged": {
+          "additionalProperties": true,
+          "title": "Merged",
+          "type": "object"
+        },
+        "type": {
+          "const": "scene",
+          "default": "scene",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "SceneEvent",
+      "type": "object"
+    },
+    "SceneState": {
+      "additionalProperties": false,
+      "description": "Merged free-form scene state stored inside `WorldState.scene`.",
+      "properties": {
+        "chars": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CharacterSceneState"
+          },
+          "title": "Chars",
+          "type": "object"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Env",
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "title": "SceneState",
+      "type": "object"
+    },
+    "SpeakerEndEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "stopped": {
+          "default": false,
+          "title": "Stopped",
+          "type": "boolean"
+        },
+        "type": {
+          "const": "speaker_end",
+          "default": "speaker_end",
+          "title": "Type",
+          "type": "string"
+        },
+        "variant_idx": {
+          "minimum": 0,
+          "title": "Variant Idx",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "message_id",
+        "variant_idx"
+      ],
+      "title": "SpeakerEndEvent",
+      "type": "object"
+    },
+    "SpeakerStartEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "seq": {
+          "minimum": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "speaker": {
+          "title": "Speaker",
+          "type": "string"
+        },
+        "type": {
+          "const": "speaker_start",
+          "default": "speaker_start",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message_id",
+        "speaker",
+        "seq"
+      ],
+      "title": "SpeakerStartEvent",
+      "type": "object"
+    },
+    "StateEvent": {
+      "additionalProperties": false,
+      "description": "World chat only (P3).",
+      "properties": {
+        "changed": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Changed",
+          "type": "array"
+        },
+        "confidence": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Confidence",
+          "type": "object"
+        },
+        "state": {
+          "$ref": "#/$defs/WorldState"
+        },
+        "type": {
+          "const": "state",
+          "default": "state",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "title": "StateEvent",
+      "type": "object"
+    },
+    "UsageEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "completion_tokens": {
+          "minimum": 0,
+          "title": "Completion Tokens",
+          "type": "integer"
+        },
+        "cost": {
+          "minimum": 0.0,
+          "title": "Cost",
+          "type": "number"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 0,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "reasoning_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Reasoning Tokens",
+          "type": "integer"
+        },
+        "type": {
+          "const": "usage",
+          "default": "usage",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "model",
+        "prompt_tokens",
+        "completion_tokens",
+        "cost"
+      ],
+      "title": "UsageEvent",
+      "type": "object"
+    },
+    "WorldState": {
+      "additionalProperties": false,
+      "description": "Canonical `chat.state` shape for world chats (architecture \u00a74.5).",
+      "properties": {
+        "awaiting_reply": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Awaiting Reply",
+          "type": "array"
+        },
+        "bonds": {
+          "additionalProperties": true,
+          "title": "Bonds",
+          "type": "object"
+        },
+        "events": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "location_id": {
+          "default": "",
+          "title": "Location Id",
+          "type": "string"
+        },
+        "manual": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Manual",
+          "type": "array"
+        },
+        "npcs": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Npcs",
+          "type": "array"
+        },
+        "present_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Present Ids",
+          "type": "array"
+        },
+        "scene": {
+          "$ref": "#/$defs/SceneState"
+        },
+        "silence": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Silence",
+          "type": "object"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "summary_upto": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Summary Upto",
+          "type": "integer"
+        },
+        "tension": {
+          "default": 0,
+          "maximum": 4,
+          "minimum": 0,
+          "title": "Tension",
+          "type": "integer"
+        },
+        "time": {
+          "default": "",
+          "title": "Time",
+          "type": "string"
+        }
+      },
+      "title": "WorldState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Object-rooted wrapper so the exported JSON Schema (and generated TS) has an object root.",
+  "properties": {
+    "event": {
+      "discriminator": {
+        "mapping": {
+          "archivist": "#/$defs/ArchivistEvent",
+          "bonds": "#/$defs/BondsEvent",
+          "content": "#/$defs/ContentEvent",
+          "director": "#/$defs/DirectorEvent",
+          "done": "#/$defs/DoneEvent",
+          "draft": "#/$defs/DraftEvent",
+          "error": "#/$defs/ErrorEvent",
+          "notice": "#/$defs/NoticeEvent",
+          "ping": "#/$defs/PingEvent",
+          "plan": "#/$defs/PlanEvent",
+          "rejudge": "#/$defs/RejudgeEvent",
+          "reset_content": "#/$defs/ResetContentEvent",
+          "scene": "#/$defs/SceneEvent",
+          "speaker_end": "#/$defs/SpeakerEndEvent",
+          "speaker_start": "#/$defs/SpeakerStartEvent",
+          "state": "#/$defs/StateEvent",
+          "usage": "#/$defs/UsageEvent"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PlanEvent"
+        },
+        {
+          "$ref": "#/$defs/SpeakerStartEvent"
+        },
+        {
+          "$ref": "#/$defs/DraftEvent"
+        },
+        {
+          "$ref": "#/$defs/DirectorEvent"
+        },
+        {
+          "$ref": "#/$defs/ContentEvent"
+        },
+        {
+          "$ref": "#/$defs/ResetContentEvent"
+        },
+        {
+          "$ref": "#/$defs/RejudgeEvent"
+        },
+        {
+          "$ref": "#/$defs/SceneEvent"
+        },
+        {
+          "$ref": "#/$defs/SpeakerEndEvent"
+        },
+        {
+          "$ref": "#/$defs/StateEvent"
+        },
+        {
+          "$ref": "#/$defs/ArchivistEvent"
+        },
+        {
+          "$ref": "#/$defs/BondsEvent"
+        },
+        {
+          "$ref": "#/$defs/NoticeEvent"
+        },
+        {
+          "$ref": "#/$defs/UsageEvent"
+        },
+        {
+          "$ref": "#/$defs/PingEvent"
+        },
+        {
+          "$ref": "#/$defs/DoneEvent"
+        },
+        {
+          "$ref": "#/$defs/ErrorEvent"
+        }
+      ],
+      "title": "Event"
+    }
+  },
+  "required": [
+    "event"
+  ],
+  "title": "TurnEventDoc",
+  "type": "object"
+}

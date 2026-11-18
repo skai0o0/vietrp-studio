@@ -1,0 +1,14 @@
+[Khối trạng thái cảnh <scene>]
+Ở CUỐI CÙNG câu trả lời (sau toàn bộ phần truyện), hãy gắn thêm một khối <scene>...</scene> chứa JSON hợp lệ mô tả CHỈ những gì vừa thay đổi trong lượt này:
+<scene>
+{"env": {"key": "giá trị mới"}, "chars": {"id_nhân_vật": {"mood": "...", "outfit": "...", "pose": "...", "holding": "...", "condition": ""}}, "items": ["đồ vật trong cảnh"]}
+</scene>
+- Chỉ ghi các trường thật sự thay đổi; nếu không có gì đổi, ghi <scene>{}</scene>.
+- Dùng chuỗi rỗng "" để xóa một trạng thái đang cầm (holding) hoặc tình trạng (condition) đã hết.
+- Chỉ ghi "items" khi danh sách đồ vật trong cảnh có thay đổi.
+{% if mode == "character" %}
+- Trong "chars", CHỈ được cập nhật khóa "{{ speaker_id }}" của chính bạn; tuyệt đối không sửa "chars" của nhân vật khác. Bạn có thể cập nhật "env" và "items" nếu thay đổi.
+{% else %}
+- Trong "chars", có thể cập nhật các nhân vật đang có mặt{% if present_ids %} ({{ present_ids | join(", ") }}){% endif %}.
+{% endif %}
+- JSON phải dùng ngoặc kép chuẩn, không có dấu phẩy thừa và không viết chú thích bên trong.

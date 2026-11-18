@@ -1,0 +1,13 @@
+Hãy chuyển bản thảo sau sang JSON chuẩn `{{ "vietrp-card" if target_type == "character" else "vietrp-world" }}`:
+
+{% if seed %}
+Ràng buộc từ hạt giống (nếu có):
+{% for key, value in seed.items() %}
+{% if key != "target_type" and value %}
+- {{ key }}: {{ value }}
+{% endif %}
+{% endfor %}
+
+{% endif %}
+[BẢN THẢO]
+{{ raw_draft }}

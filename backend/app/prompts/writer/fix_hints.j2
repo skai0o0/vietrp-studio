@@ -1,0 +1,10 @@
+[Chỉ dẫn sửa bản viết trước]
+{% if rejected_draft %}
+Bản trước bị loại:
+{{ rejected_draft }}
+
+{% endif %}
+Hãy viết lại lượt trả lời, khắc phục các điểm sau:
+{% for hint in hints %}
+- {{ hint }}
+{% endfor %}

@@ -1,0 +1,15 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "variant_idx": {
+      "minimum": 0,
+      "title": "Variant Idx",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "variant_idx"
+  ],
+  "title": "ActiveVariantRequest",
+  "type": "object"
+}

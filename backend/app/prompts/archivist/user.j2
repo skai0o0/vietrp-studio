@@ -1,0 +1,24 @@
+[TÓM TẮT CŨ]
+{{ previous_summary if previous_summary else "(chưa có)" }}
+
+[SỰ KIỆN ĐÁNG NHỚ CŨ]
+{% if previous_events %}
+{% for event in previous_events %}
+- {{ event.title }} | {{ event.content }}
+{% endfor %}
+{% else %}
+(chưa có)
+{% endif %}
+
+[CÁC LƯỢT MỚI CẦN GHI LẠI]
+{% for msg in messages %}
+{% if msg.priority >= 2 %}[QUAN TRỌNG] {% elif msg.priority > 0 %}[ĐÁNG CHÚ Ý] {% endif %}{{ msg.speaker_name }}: {{ msg.content }}
+{% endfor %}
+
+Trả lời đúng hai phần, theo mẫu:
+TÓM TẮT:
+- (tối đa 10 gạch đầu dòng: diễn biến chính theo thứ tự thời gian; rút gọn câu thành cụm từ nhưng giữ đủ chi tiết ở các lượt [QUAN TRỌNG] và [ĐÁNG CHÚ Ý])
+SỰ KIỆN ĐÁNG NHỚ:
+- Tên nhân vật + việc (vd: Vy hứa cứu file cho Tuấn) | một câu nêu sự thật cụ thể
+
+Phần SỰ KIỆN ĐÁNG NHỚ là danh sách viết lại TOÀN BỘ (giữ sự kiện cũ còn đúng, sửa cái đã thay đổi, bỏ cái không còn quan trọng, thêm cái mới), tối đa {{ max_events }} dòng. Chỉ ghi những thứ cần nhớ về sau: lời hứa, hẹn, nợ, bí mật đã lộ và lộ cho ai, quan hệ thay đổi, đồ vật trao tay, quyết định quan trọng. Tiêu đề PHẢI có tên nhân vật liên quan, không dùng tiêu đề chung chung như "Lời hứa" hay "Bí mật đã lộ".

@@ -1,0 +1,18 @@
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1","provider":"TestProv","choices":[{"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1","choices":[{"delta":{"reasoning":"Hmm, "},"finish_reason":null}]}
+
+data: {"id":"gen-1","choices":[{"delta":{"content":"Xin chào"},"finish_reason":null}]}
+
+data: {"id":"gen-1","choices":[{"delta":{"content":" thế giới"},"finish_reason":null}]}
+
+data: {"id":"gen-1","choices":[{"delta":{"content":""},"finish_reason":"length"}]}
+
+data: {"id":"gen-1","choices":[],"usage":{"prompt_tokens":120,"completion_tokens":30,"total_tokens":150,"cost":0.0004,"completion_tokens_details":{"reasoning_tokens":12}}}
+
+data: [DONE]
+

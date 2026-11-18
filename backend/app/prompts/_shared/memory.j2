@@ -1,0 +1,5 @@
+{% if summary %}[Tóm tắt trước đó]
+{{ summary }}
+{% endif %}{% if events %}[Sự kiện đáng nhớ]
+{% for event in events %}- {{ event }}
+{% endfor %}{% endif %}

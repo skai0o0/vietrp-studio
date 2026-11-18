@@ -1,0 +1,152 @@
+{
+  "$defs": {
+    "CharacterSceneState": {
+      "additionalProperties": false,
+      "description": "Per-character free-form scene fields managed via `<scene>` blocks or manual edits.",
+      "properties": {
+        "condition": {
+          "default": "",
+          "title": "Condition",
+          "type": "string"
+        },
+        "holding": {
+          "default": "",
+          "title": "Holding",
+          "type": "string"
+        },
+        "mood": {
+          "default": "",
+          "title": "Mood",
+          "type": "string"
+        },
+        "outfit": {
+          "default": "",
+          "title": "Outfit",
+          "type": "string"
+        },
+        "pose": {
+          "default": "",
+          "title": "Pose",
+          "type": "string"
+        }
+      },
+      "title": "CharacterSceneState",
+      "type": "object"
+    },
+    "SceneState": {
+      "additionalProperties": false,
+      "description": "Merged free-form scene state stored inside `WorldState.scene`.",
+      "properties": {
+        "chars": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CharacterSceneState"
+          },
+          "title": "Chars",
+          "type": "object"
+        },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Env",
+          "type": "object"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "title": "SceneState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canonical `chat.state` shape for world chats (architecture \u00a74.5).",
+  "properties": {
+    "awaiting_reply": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Awaiting Reply",
+      "type": "array"
+    },
+    "bonds": {
+      "additionalProperties": true,
+      "title": "Bonds",
+      "type": "object"
+    },
+    "events": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "location_id": {
+      "default": "",
+      "title": "Location Id",
+      "type": "string"
+    },
+    "manual": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Manual",
+      "type": "array"
+    },
+    "npcs": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Npcs",
+      "type": "array"
+    },
+    "present_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Present Ids",
+      "type": "array"
+    },
+    "scene": {
+      "$ref": "#/$defs/SceneState"
+    },
+    "silence": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Silence",
+      "type": "object"
+    },
+    "summary": {
+      "default": "",
+      "title": "Summary",
+      "type": "string"
+    },
+    "summary_upto": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Summary Upto",
+      "type": "integer"
+    },
+    "tension": {
+      "default": 0,
+      "maximum": 4,
+      "minimum": 0,
+      "title": "Tension",
+      "type": "integer"
+    },
+    "time": {
+      "default": "",
+      "title": "Time",
+      "type": "string"
+    }
+  },
+  "title": "WorldState",
+  "type": "object"
+}

@@ -1,0 +1,54 @@
+{
+  "$defs": {
+    "PromptLayer": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "tokens": {
+          "minimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "tokens",
+        "text"
+      ],
+      "title": "PromptLayer",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "budget": {
+      "minimum": 0,
+      "title": "Budget",
+      "type": "integer"
+    },
+    "layers": {
+      "items": {
+        "$ref": "#/$defs/PromptLayer"
+      },
+      "title": "Layers",
+      "type": "array"
+    },
+    "total_tokens": {
+      "minimum": 0,
+      "title": "Total Tokens",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "layers",
+    "total_tokens",
+    "budget"
+  ],
+  "title": "PromptPreview",
+  "type": "object"
+}

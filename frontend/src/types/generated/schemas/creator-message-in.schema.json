@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "text": {
+      "maxLength": 20000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "title": "CreatorMessageIn",
+  "type": "object"
+}

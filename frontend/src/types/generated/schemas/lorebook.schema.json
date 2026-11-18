@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "LorebookEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "constant": {
+          "default": false,
+          "title": "Constant",
+          "type": "boolean"
+        },
+        "content": {
+          "default": "",
+          "title": "Content",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "id": {
+          "pattern": "^[a-z0-9_]{1,40}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keys",
+          "type": "array"
+        },
+        "position": {
+          "default": "before_char",
+          "enum": [
+            "before_char",
+            "after_char"
+          ],
+          "title": "Position",
+          "type": "string"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "secondary_keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secondary Keys",
+          "type": "array"
+        },
+        "select_mode": {
+          "default": "keyword",
+          "enum": [
+            "keyword",
+            "ai",
+            "both"
+          ],
+          "title": "Select Mode",
+          "type": "string"
+        },
+        "selective": {
+          "default": false,
+          "title": "Selective",
+          "type": "boolean"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "LorebookEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/LorebookEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    },
+    "format": {
+      "const": "vietrp-lorebook",
+      "default": "vietrp-lorebook",
+      "title": "Format",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "scan_depth": {
+      "default": 50,
+      "minimum": 1,
+      "title": "Scan Depth",
+      "type": "integer"
+    },
+    "spec_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Spec Version",
+      "type": "string"
+    },
+    "token_budget": {
+      "default": 500,
+      "minimum": 0,
+      "title": "Token Budget",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "Lorebook",
+  "type": "object"
+}

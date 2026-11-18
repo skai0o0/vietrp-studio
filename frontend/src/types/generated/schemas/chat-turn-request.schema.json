@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "prefill": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prefill"
+    },
+    "text": {
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "title": "TurnRequest",
+  "type": "object"
+}

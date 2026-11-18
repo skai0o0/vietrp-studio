@@ -1,0 +1,13 @@
+{% set tension_labels = ["Rất thoải mái", "Bình thường", "Hơi căng", "Căng thẳng", "Rất căng"] %}
+Thực tại: {{ world_name }}
+{% if location_path %}
+Địa điểm hiện tại: {{ location_path }}
+{% endif %}
+{% if nearby %}
+Địa điểm lân cận: {{ nearby | join("; ") }}
+{% endif %}
+{% if time %}
+Thời gian: {{ time }}
+{% endif %}
+Độ căng: {{ tension_labels[tension] }} ({{ tension }}/4)
+Có mặt: {{ user }}{% if present %}, {{ present | join(", ") }}{% endif %}

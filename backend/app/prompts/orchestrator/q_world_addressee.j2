@@ -1,0 +1,11 @@
+Trong tin cuối của {{ user }}, {{ user }} đang nói hoặc hỏi trực tiếp với ai? Để ý {{ user }} đang ở cạnh ai, câu hỏi nhắm vào ai, và các đại từ xưng hô trong câu chỉ người nào.
+---
+{% for c in present %}
+{{ c.id }}: {{ c.name }}
+
+{% endfor %}
+{% for c in absent %}
+{{ c.id }}: {{ c.name }}{% if c.tagline %} ({{ c.tagline }}; chưa có mặt){% else %} (chưa có mặt){% endif %}
+
+{% endfor %}
+group: Cả nhóm, hoặc không nói với ai cụ thể

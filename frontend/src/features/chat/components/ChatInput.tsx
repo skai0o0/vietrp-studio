@@ -1,0 +1,376 @@
+import { FastForward, History, SendHorizontal, Square, TextCursorInput, Undo2 } from "lucide-react";
+import { useRef, useState, type KeyboardEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
+import { cn } from "@/lib/cn";
+import { useBreakpoint } from "@/lib/useBreakpoint";
+import { CommandPopup } from "./CommandPopup";
+import { TokenBar } from "./TokenBar";
+import {
+  commandQuery,
+  filterCommandHistory,
+  filterCommands,
+  loadCommandHistory,
+  saveCommandHistory,
+  type SlashCommand,
+} from "./commands";
+
+/** How many sent messages the Up arrow can recall. */
+const HISTORY_LIMIT = 30;
+const MENU_ITEM_CLS =
+  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus";
+const MENU_HEADER_CLS =
+  "border-b border-border bg-surface-2 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted";
+
+interface SlashMenuWithHistoryProps {
+  historyMatches: readonly string[];
+  commands: readonly SlashCommand[];
+  activeIndex: number;
+  onPickHistory: (entry: string) => void;
+  onPickCommand: (command: SlashCommand) => void;
+}
+
+function SlashMenuWithHistory({
+  historyMatches,
+  commands,
+  activeIndex,
+  onPickHistory,
+  onPickCommand,
+}: SlashMenuWithHistoryProps) {
+  return (
+    <ul
+      role="listbox"
+      id="chat-command-list"
+      aria-label={t("chat.input.commandsLabel")}
+      className="absolute inset-x-3 bottom-full z-10 mb-1 max-h-60 overflow-y-auto rounded-lg border border-border bg-surface md:inset-x-4"
+    >
+      <li role="presentation" className={MENU_HEADER_CLS}>
+        {t("chat.input.historySection")}
+      </li>
+      {historyMatches.map((entry, i) => (
+        <li key={`h:${entry}`} role="option" aria-selected={i === activeIndex}>
+          <button
+            type="button"
+            onClick={() => onPickHistory(entry)}
+            className={cn(MENU_ITEM_CLS, i === activeIndex && "bg-surface-2")}
+          >
+            <History className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate font-mono text-fg">{entry}</span>
+          </button>
+        </li>
+      ))}
+      {commands.length > 0 && (
+        <>
+          <li role="presentation" className={cn(MENU_HEADER_CLS, "border-t")}>
+            {t("chat.input.commandsSection")}
+          </li>
+          {commands.map((command, i) => {
+            const idx = historyMatches.length + i;
+            return (
+              <li key={command.name} role="option" aria-selected={idx === activeIndex}>
+                <button
+                  type="button"
+                  onClick={() => onPickCommand(command)}
+                  className={cn(MENU_ITEM_CLS, "gap-3", idx === activeIndex && "bg-surface-2")}
+                >
+                  <span className="font-mono text-accent-2">/{command.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-muted">{t(command.hintKey)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </>
+      )}
+    </ul>
+  );
+}
+
+function InputIconBtn({
+  label,
+  variant = "ghost",
+  pressed,
+  disabled,
+  className,
+  onClick,
+  children,
+}: {
+  label: string;
+  variant?: "ghost" | "outline" | "danger" | "default";
+  pressed?: boolean;
+  disabled?: boolean;
+  className?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Button
+      type="button"
+      variant={variant}
+      size="icon"
+      aria-pressed={pressed}
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className={className}
+    >
+      {children}
+    </Button>
+  );
+}
+
+interface ChatInputProps {
+  isStreaming: boolean;
+  usedTokens: number | null;
+  budget: number | null;
+  /** Resolve false when the request failed before streaming, so the text is put back. */
+  onSend: (text: string, prefill: string) => Promise<boolean | void> | void;
+  onStop: () => void;
+  onOpenInspector: () => void;
+  onTextChange: (text: string) => void;
+  onContinue?: (prefill?: string) => Promise<boolean | void> | void;
+  onUndo?: () => void;
+  canContinue?: boolean;
+  canUndo?: boolean;
+  isActionPending?: boolean;
+}
+
+export function ChatInput({
+  isStreaming,
+  usedTokens,
+  budget,
+  onSend,
+  onStop,
+  onOpenInspector,
+  onTextChange,
+  onContinue,
+  onUndo,
+  canContinue = false,
+  canUndo = false,
+  isActionPending = false,
+}: ChatInputProps) {
+  const [text, setText] = useState("");
+  const [prefill, setPrefill] = useState("");
+  const [prefillOpen, setPrefillOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const [popupDismissed, setPopupDismissed] = useState(false);
+  const [cmdHistory, setCmdHistory] = useState<string[]>(() => loadCommandHistory());
+  const [history, setHistory] = useState<string[]>(() => loadCommandHistory());
+  const narrow = useBreakpoint() === "mobile";
+  const historyPos = useRef<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const query = commandQuery(text);
+  const commands = query === null ? [] : filterCommands(query);
+  const historyMatches = query === null ? [] : filterCommandHistory(cmdHistory, query);
+  const totalItems = historyMatches.length + commands.length;
+  const popupOpen = !popupDismissed && query !== null && totalItems > 0;
+  const safeActive = totalItems > 0 ? Math.min(active, totalItems - 1) : 0;
+
+  function update(value: string) {
+    setText(value);
+    setActive(0);
+    setPopupDismissed(false);
+    historyPos.current = null;
+    onTextChange(value);
+  }
+
+  function submit() {
+    const body = text.trim();
+    if (!body || isStreaming || isActionPending) return;
+    const sentPrefill = prefillOpen ? prefill.trim() : "";
+    const result = onSend(body, sentPrefill);
+    if (body.startsWith("/")) {
+      setCmdHistory(saveCommandHistory(body));
+    }
+    setHistory((h) => [body, ...h.filter((x) => x !== body)].slice(0, HISTORY_LIMIT));
+    update("");
+    if (sentPrefill) setPrefill("");
+    void Promise.resolve(result).then((ok) => {
+      if (ok !== false) return;
+      // Request failed before streaming: give the typed text back (unless the user already typed anew).
+      setText((current) => {
+        if (current !== "") return current;
+        onTextChange(body);
+        return body;
+      });
+      if (sentPrefill) setPrefill((current) => current || sentPrefill);
+    });
+  }
+
+  function handleContinue() {
+    if (isStreaming || isActionPending || !onContinue) return;
+    const sentPrefill = prefillOpen ? prefill.trim() : "";
+    const result = onContinue(sentPrefill || undefined);
+    if (sentPrefill) setPrefill("");
+    void Promise.resolve(result).then((ok) => {
+      if (ok === false && sentPrefill) {
+        setPrefill((current) => current || sentPrefill);
+      }
+    });
+  }
+
+  function pick(command: SlashCommand) {
+    if (command.supported) {
+      update(`/${command.name} `);
+      textareaRef.current?.focus();
+    }
+  }
+
+  function pickHistory(entry: string) {
+    setText(entry);
+    setActive(0);
+    setPopupDismissed(true);
+    historyPos.current = null;
+    onTextChange(entry);
+    textareaRef.current?.focus();
+  }
+
+  function recall(direction: 1 | -1) {
+    const next = (historyPos.current ?? -1) + direction;
+    if (next < 0) {
+      if (historyPos.current !== null) {
+        historyPos.current = null;
+        setPopupDismissed(false);
+        setText("");
+        onTextChange("");
+      }
+      return;
+    }
+    if (next >= history.length) return;
+    historyPos.current = next;
+    const value = history[next] ?? "";
+    setPopupDismissed(true);
+    setText(value);
+    onTextChange(value);
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (popupOpen) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setPopupDismissed(true);
+        return;
+      }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const step = event.key === "ArrowDown" ? 1 : -1;
+        setActive((i) => (i + step + totalItems) % totalItems);
+        return;
+      }
+      if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault();
+        if (safeActive < historyMatches.length) {
+          const entry = historyMatches[safeActive];
+          if (entry !== undefined) pickHistory(entry);
+        } else {
+          const command = commands[safeActive - historyMatches.length];
+          if (command?.supported) pick(command);
+        }
+        return;
+      }
+    } else if (text === "" || historyPos.current !== null) {
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        recall(1);
+        return;
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        recall(-1);
+        return;
+      }
+    }
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      submit();
+    }
+  }
+
+  const showContinue = !isStreaming && canContinue && Boolean(onContinue) && text.trim() === "";
+  const showUndo = !isStreaming && canUndo && Boolean(onUndo);
+
+  return (
+    <div className="relative border-t border-border bg-bg px-3 pb-safe pt-2 md:px-4">
+      {popupOpen && historyMatches.length === 0 && (
+        <CommandPopup commands={commands} activeIndex={safeActive} onPick={pick} />
+      )}
+      {popupOpen && historyMatches.length > 0 && (
+        <SlashMenuWithHistory
+          historyMatches={historyMatches}
+          commands={commands}
+          activeIndex={safeActive}
+          onPickHistory={pickHistory}
+          onPickCommand={pick}
+        />
+      )}
+      <div className="mb-2 overflow-hidden rounded-lg border border-border bg-surface focus-within:border-focus">
+        <TokenBar used={usedTokens} budget={budget} onOpen={onOpenInspector} />
+        {prefillOpen && (
+          <input
+            value={prefill}
+            onChange={(e) => setPrefill(e.target.value)}
+            aria-label={t("chat.input.prefillLabel")}
+            placeholder={t("chat.input.prefillPlaceholder")}
+            className="block w-full border-b border-border bg-surface-2 px-3 py-2 font-content text-sm text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
+          />
+        )}
+        <div className="flex items-end gap-1 p-1">
+          <InputIconBtn
+            label={t("chat.input.prefillToggle")}
+            pressed={prefillOpen}
+            className={cn(prefillOpen && "text-accent-2")}
+            onClick={() => setPrefillOpen((v) => !v)}
+          >
+            <TextCursorInput aria-hidden="true" />
+          </InputIconBtn>
+          {showUndo && onUndo && (
+            <InputIconBtn label={t("chat.input.undo")} disabled={isActionPending} onClick={onUndo}>
+              <Undo2 aria-hidden="true" />
+            </InputIconBtn>
+          )}
+          <textarea
+            ref={textareaRef}
+            value={text}
+            rows={1}
+            onChange={(e) => update(e.target.value)}
+            onKeyDown={onKeyDown}
+            aria-label={t("chat.input.label")}
+            aria-controls={popupOpen ? "chat-command-list" : undefined}
+            placeholder={narrow ? t("chat.input.placeholderShort") : t("chat.input.placeholder")}
+            className="max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 font-content text-base text-fg placeholder:text-muted focus-visible:outline-none"
+          />
+          {showContinue && (
+            <InputIconBtn
+              label={t("chat.input.continue")}
+              variant="outline"
+              disabled={isActionPending}
+              onClick={handleContinue}
+            >
+              <FastForward aria-hidden="true" />
+            </InputIconBtn>
+          )}
+          {isStreaming ? (
+            <InputIconBtn label={t("chat.input.stop")} variant="danger" onClick={onStop}>
+              <Square aria-hidden="true" />
+            </InputIconBtn>
+          ) : (
+            <InputIconBtn
+              label={t("chat.input.send")}
+              variant="default"
+              disabled={text.trim() === "" || isActionPending}
+              onClick={submit}
+            >
+              <SendHorizontal aria-hidden="true" />
+            </InputIconBtn>
+          )}
+        </div>
+        <p className="px-3 pb-1 text-right text-[11px] text-muted">
+          {usedTokens !== null && budget !== null
+            ? t("chat.input.tokens", { used: usedTokens, budget })
+            : t("chat.input.tokensUnknown")}
+        </p>
+      </div>
+    </div>
+  );
+}

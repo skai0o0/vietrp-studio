@@ -1,0 +1,1 @@
+{"id":"gen-2","model":"deepseek/deepseek-v4.1-flash-1017","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"Đã rõ."}}],"usage":{"prompt_tokens":50,"completion_tokens":5,"cost":0.0001,"completion_tokens_details":{"reasoning_tokens":0}}}

@@ -1,0 +1,21 @@
+[Nhân vật đang có mặt]
+- {{ user_name }}{% if user_name != "người chơi" %} (người chơi){% endif %}
+
+{% for c in present %}
+- {{ c.name }} ({{ c.id }}){% if c.tagline %}: {{ c.tagline }}{% endif %}
+
+{% endfor %}
+{% if npcs %}
+[Nhân vật phụ có mặt]
+{% for npc in npcs %}
+- {{ npc.name }}{% if npc.age is not none %} ({{ npc.age }} tuổi){% endif %}
+
+{% endfor %}
+{% endif %}
+{% if arriving %}
+[Đang bước vào cảnh]
+{% for c in arriving %}
+- {{ c.name }} ({{ c.id }}){% if c.tagline %}: {{ c.tagline }}{% endif %}
+
+{% endfor %}
+{% endif %}

@@ -1,0 +1,56 @@
+[project]
+name = "vietrp-studio-backend"
+version = "0.1.0"
+description = "VietRP Studio backend"
+requires-python = "==3.12.*"
+dependencies = [
+  "fastapi==0.163.2",
+  "uvicorn[standard]==0.54.0",
+  "pydantic==2.14.3",
+  "pydantic-settings==2.16.3",
+  "sqlalchemy[asyncio]==2.1.9",
+  "asyncpg==0.32.0",
+  "alembic==1.20.1",
+  "httpx==0.28.1",
+  "tiktoken==0.14.0",
+  "argon2-cffi==25.1.0",
+  "cryptography==50.0.2",
+  "jinja2==3.1.6",
+  "sse-starlette==3.7.0",
+  "python-multipart==0.0.34",  # FastAPI multipart parsing for uploads and import (P1 WP-I)
+]
+
+[dependency-groups]
+dev = [
+  "pytest==9.2.0",
+  "pytest-asyncio==1.5.0",
+  "ruff==0.17.5",
+  "mypy==2.4.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["app"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["live: opt-in tests that hit the real network (run with -m live and VIETRP_LIVE=1)"]
+addopts = "-m 'not live'"

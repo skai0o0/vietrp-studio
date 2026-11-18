@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "CharacterOut": {
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "avatar_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Avatar Url"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_owner": {
+          "title": "Is Owner",
+          "type": "boolean"
+        },
+        "judge_score": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Judge Score"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "needs_age": {
+          "title": "Needs Age",
+          "type": "boolean"
+        },
+        "tagline": {
+          "title": "Tagline",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "private"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/FormatWarning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "data",
+        "is_owner",
+        "author",
+        "created_at",
+        "id",
+        "name",
+        "tagline",
+        "tags",
+        "visibility",
+        "needs_age",
+        "updated_at",
+        "avatar_url"
+      ],
+      "title": "CharacterOut",
+      "type": "object"
+    },
+    "FormatWarning": {
+      "description": "A soft issue found during validation; never blocks a write.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "code",
+        "message"
+      ],
+      "title": "FormatWarning",
+      "type": "object"
+    },
+    "WorldOut": {
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "cover_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cover Url"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "is_owner": {
+          "title": "Is Owner",
+          "type": "boolean"
+        },
+        "judge_score": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Judge Score"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "needs_age": {
+          "title": "Needs Age",
+          "type": "boolean"
+        },
+        "tagline": {
+          "title": "Tagline",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "private"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/FormatWarning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "data",
+        "is_owner",
+        "author",
+        "created_at",
+        "id",
+        "name",
+        "tagline",
+        "tags",
+        "visibility",
+        "needs_age",
+        "updated_at",
+        "cover_url"
+      ],
+      "title": "WorldOut",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "character": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CharacterOut"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "item_id": {
+      "title": "Item Id",
+      "type": "string"
+    },
+    "target_type": {
+      "enum": [
+        "character",
+        "world"
+      ],
+      "title": "Target Type",
+      "type": "string"
+    },
+    "world": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WorldOut"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "target_type",
+    "item_id"
+  ],
+  "title": "CreatorSaveOut",
+  "type": "object"
+}

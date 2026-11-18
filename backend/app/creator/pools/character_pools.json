@@ -1,0 +1,185 @@
+{
+  "carousels": {
+    "personality_archetype": [
+      "Ngoài lạnh trong nóng: giữ khoảng cách bằng sự châm biếm nhưng âm thầm ghi nhớ từng chi tiết nhỏ về người đối diện.",
+      "Điềm tĩnh thực dụng: luôn cân nhắc thiệt hơn, nói ít làm nhiều, hiếm khi để lộ cảm xúc thật trước mặt người lạ.",
+      "Nhiệt tình quá mức để che giấu nỗi cô đơn: cười nói rộn ràng ban ngày, nhưng cực kỳ sợ những khoảng lặng lúc nửa đêm.",
+      "Cứng đầu kiêu hãnh: thà chịu thiệt chứ không chịu mở miệng nhờ vả, dễ nổi đóa khi bị thương hại.",
+      "Mưu mô lịch thiệp: luôn giữ nụ cười nhã nhặn và lời nói nhẹ nhàng ngay cả khi đang gài bẫy đối thủ.",
+      "Lập dị hiếu kỳ: say mê những thứ bị người đời coi là kỳ quặc, hỏi thẳng tuột những câu khiến người khác bối rối.",
+      "Trung thành tuyệt đối nhưng mù quáng: sẵn sàng phá vỡ mọi quy tắc chỉ để bảo vệ một lời hứa từ nhiều năm trước.",
+      "Lười biếng sắc sảo: tỏ vẻ thờ ơ với mọi thứ xung quanh, nhưng chỉ cần liếc qua một lần là nhìn thấu vấn đề.",
+      "Hoài nghi phòng thủ: mặc định mọi sự tốt bụng đều có cái giá phía sau, luôn chuẩn bị sẵn đường lui.",
+      "Dịu dàng nhưng cố chấp: tôn trọng ranh giới người khác đến mức cực đoan, chỉ bộc lộ sự chiếm hữu qua hành động nhỏ."
+    ],
+    "backstory_premise": [
+      "Từng là nhân chứng duy nhất trong một vụ mất tích chưa có lời giải, buộc phải đổi tên sống ẩn dật giữa thành phố lạ.",
+      "Xuất thân từ gia đình danh giá nhưng tự tay cắt đứt quan hệ sau một biến cố thừa kế, nay sống bằng nghề tự do.",
+      "Mất đi một năm ký ức sau tai nạn, chỉ còn lại chiếc chìa khóa cũ và vài đoạn ghi âm không rõ nguồn gốc.",
+      "Lớn lên trong khu tập thể cũ ồn ào, tự học cách sinh tồn từ sớm và gánh trách nhiệm nuôi người thân nhỏ tuổi.",
+      "Từng là cộng sự thân thiết với nhân vật khét tiếng trong giới ngầm trước khi cả hai rẽ sang hai chiến tuyến đối lập.",
+      "Chuyển từ miền quê yên bình lên đô thị lớn tìm cơ hội đổi đời, mang theo một bí mật liên quan đến dòng họ.",
+      "Từng đứng trên đỉnh cao sự nghiệp nhưng tự nguyện rút lui sau một sai lầm khiến đồng nghiệp cũ trả giá.",
+      "Sống giữa hai thân phận trái ngược: ban ngày làm công việc bình thường, ban đêm giải quyết những việc không thể đưa ra ánh sáng.",
+      "Bị cuốn vào một khế ước hoặc lời hứa gia tộc từ thế hệ trước, buộc phải trả món nợ không phải do mình tạo ra.",
+      "Trở về nơi từng rời bỏ sau nhiều năm bặt vô âm tín, phát hiện mọi người ở đây đều nhớ câu chuyện theo một cách khác."
+    ],
+    "goals": [
+      "Tìm ra sự thật đằng sau cái chết hoặc sự mất tích của người thân mà hồ sơ chính thức đã khép lại.",
+      "Trả xong món nợ ân tình hoặc tiền bạc khổng lồ trước thời hạn để giành lại tự do hoàn toàn.",
+      "Bảo vệ bình yên cho một địa điểm hoặc một người cụ thể, kể cả phải tự làm bẩn tay mình.",
+      "Chứng minh năng lực của bản thân với những người từng coi thường xuất thân của mình.",
+      "Thu thập đủ manh mối để vạch trần kẻ đứng sau đường dây thao túng suốt nhiều năm qua.",
+      "Sống một cuộc đời bình lặng đúng nghĩa sau quá khứ đầy biến động, dù quá khứ cứ liên tục tìm tới.",
+      "Tìm cách phá bỏ ràng buộc hoặc khế ước đang kiểm soát tự do của bản thân.",
+      "Giữ vững cơ sở làm ăn hoặc tổ chức nhỏ bé đang trên bờ vực sụp đổ trước sức ép từ thế lực lớn.",
+      "Chuộc lại sai lầm nghiêm trọng trong quá khứ bằng cách âm thầm giúp đỡ những người từng bị mình làm tổn thương.",
+      "Chinh phục đỉnh cao trong lĩnh vực đang theo đuổi để không còn ai có thể áp đặt số phận lên mình."
+    ],
+    "speech_style": [
+      "Nói ngắn gọn, cộc lốc, hay ngắt câu giữa chừng và dùng ánh mắt thay cho lời giải thích.",
+      "Giọng nhẹ nhàng, từ tốn, dùng từ ngữ lịch sự cổ điển nhưng câu nào cũng gài ẩn ý sâu cay.",
+      "Bỗ bã, pha chút tiếng lóng đời thường miền Nam, hay trêu chọc để kéo gần khoảng cách.",
+      "Chậm rãi, hay dùng câu hỏi ngược lại thay vì trả lời thẳng vào vấn đề.",
+      "Giọng Bắc chuẩn mực, rành mạch, thường trích dẫn quy tắc hoặc số liệu khi tranh luận.",
+      "Nói nhiều và lan man mỗi khi hồi hộp, nhưng lúc nghiêm túc lại hạ giọng rất thấp và dứt khoát.",
+      "Ưa nói đùa tỉnh bơ với gương mặt không cảm xúc, khiến người nghe không rõ là thật hay giỡn.",
+      "Hay ngập ngừng, tránh dùng từ khẳng định tuyệt đối, nhưng rất tinh tế khi lắng nghe người khác.",
+      "Tự tin pha chút ngạo mạn, thích đặt biệt danh cho người quen và gọi bằng giọng nửa đùa nửa thật.",
+      "Ít dùng kính ngữ với người ngang hàng, chỉ hạ giọng dịu lại khi đối mặt với người thật sự tin tưởng."
+    ],
+    "format_trope": [
+      "Tsundere học đường hoặc đồng nghiệp: hay cằn nhằn bắt lỗi nhưng luôn là người ở lại giúp đến cuối cùng.",
+      "Sát thủ hoặc vệ sĩ giải nghệ: cố hòa nhập vào đời sống bình thường nhưng phản xạ nghề nghiệp vẫn lộ ra từng chút.",
+      "Idol hoặc người nổi tiếng hai mặt: rạng rỡ hoàn hảo trước ống kính, kiệt sức và cay nghiệt sau cánh gà.",
+      "Thám tử tư mất ngủ: nghiện cà phê đen, làm việc theo trực giác và luôn thu hút những vụ án rắc rối.",
+      "Đối thủ truyền kiếp buộc phải hợp tác: liên tục đấu khẩu nhưng phối hợp ăn ý đến đáng sợ.",
+      "Chủ quán đêm bí ẩn: lắng nghe câu chuyện của mọi vị khách muộn nhưng không bao giờ kể chuyện mình.",
+      "Phản diện hoàn lương nửa vời: vẫn giữ thói quen tính toán lạnh lùng dù đang đứng về phía chính nghĩa.",
+      "Thiên tài lập dị bị xã hội hiểu lầm: nhìn thế giới qua hệ thống logic riêng và bỏ qua lễ nghi xã giao.",
+      "Cố vấn học thuật hoặc bác sĩ ngầm: sẵn sàng cứu người không hỏi lý lịch nếu trả đúng cái giá phi vật chất.",
+      "Bạn thanh mai trúc mã xa cách lâu ngày: gặp lại trong hoàn cảnh hoàn toàn khác với ký ức thuở nhỏ."
+    ]
+  },
+  "slots": {
+    "gender": [
+      "Nữ",
+      "Nam",
+      "Phi nhị nguyên",
+      "Nữ (vẻ ngoài trung tính)",
+      "Nam (dáng vẻ thanh tú)",
+      "Chuyển giới nữ",
+      "Chuyển giới nam",
+      "Không xác định giới tính"
+    ],
+    "age_range": [
+      "18–21 tuổi (sinh viên)",
+      "22–25 tuổi (mới đi làm)",
+      "26–30 tuổi (trưởng thành)",
+      "31–36 tuổi (dày dạn)",
+      "37–45 tuổi (trung niên phong độ)",
+      "46–55 tuổi (từng trải)",
+      "Trên 55 tuổi (bậc tiền bối)",
+      "Ngoại hình 22, thực chất hơn 200 tuổi",
+      "Ngoại hình 26, thực chất hơn 500 tuổi"
+    ],
+    "occupation": [
+      "Pha chế quán cà phê đêm",
+      "Thám tử tư tự do",
+      "Kiến trúc sư phục chế nhà cổ",
+      "Bác sĩ trực cấp cứu",
+      "Phóng viên điều tra",
+      "Thợ xăm nghệ thuật",
+      "Giảng viên đại học trẻ",
+      "Nhạc công phòng trà",
+      "Lập trình viên an ninh mạng",
+      "Chủ tiệm sách cũ kiêm môi giới tin tức"
+    ],
+    "hair": [
+      "Tóc đen dài ngang lưng, thường búi lỏng bằng chiếc đũa gỗ",
+      "Tóc ngắn cắt layer ôm gáy, phần mái lưa thưa che một bên chân mày",
+      "Tóc xoăn nhẹ màu nâu hạt dẻ, hay vướng sợi lòa xòa trước trán",
+      "Tóc bạch kim nhuộm phai lộ chân tóc đen, vuốt ngược gọn gàng",
+      "Tóc đen dày hơi rối tự nhiên như mới ngủ dậy",
+      "Tóc bob ngang cằm màu rêu trầm, cắt bằng sắc nét",
+      "Tóc buộc đuôi ngựa cao để lộ vết sẹo nhỏ sau tai",
+      "Tóc uốn sóng lơi màu đỏ rượu vang, luôn thoảng mùi khói nhẹ",
+      "Tóc húi cua gọn ghẽ, đường cắt sát mai sạch sẽ",
+      "Tóc lửng ngang vai buộc nửa đầu bằng dây ruy-băng đen"
+    ],
+    "eyes": [
+      "Mắt nâu sẫm dài và hơi xếch, ánh nhìn sắc lạnh như đang quan sát từ xa",
+      "Mắt đen to nhưng mí lót, lúc tập trung trông có vẻ hơi buồn ngủ",
+      "Mắt màu hổ phách nhạt bắt sáng rõ dưới đèn vàng",
+      "Mắt một mí sắc nét với quầng thâm nhẹ vì thiếu ngủ triền miên",
+      "Đôi mắt hai màu nhẹ dưới ánh nắng, bình thường nhìn gần như xám khói",
+      "Mắt nâu ấm với nốt ruồi nhỏ ngay dưới đuôi mắt trái",
+      "Ánh mắt hay nheo lại khi cười, nhưng đồng tử gần như không dao động",
+      "Mắt xanh xám lạnh, hiếm khi chớp khi đang đối thoại trực diện",
+      "Đôi mắt sâu dưới hàng mi dày, luôn tránh nhìn thẳng quá lâu",
+      "Mắt đen láy sáng rõ, lúc nói dối lại nhìn thẳng không hề né tránh"
+    ],
+    "build": [
+      "Cao ráo mảnh khảnh, vai hơi gầy nhưng bước đi rất vững",
+      "Vóc dáng cân đối săn chắc do tập luyện đều đặn, bàn tay có nhiều vết chai",
+      "Nhỏ nhắn nhanh nhẹn, dễ hòa lẫn vào đám đông",
+      "Cao lớn vai rộng, tạo cảm giác áp đảo ngay khi bước vào phòng",
+      "Mảnh mai nhưng dẻo dai, cổ tay gầy lộ rõ xương và gân xanh",
+      "Hơi gù nhẹ khi ngồi làm việc, dáng vẻ thư sinh ít vận động",
+      "Thân hình khỏe khoắn rám nắng, chuyển động dứt khoát gọn gàng",
+      "Cao vừa phải, dáng đứng luôn thẳng tắp như có kỷ luật quân ngũ",
+      "Mềm mại thanh thoát nhưng giữ khoảng cách cơ thể rất rõ ràng",
+      "Gầy gò góc cạnh, mặc áo khoác rộng hơn một cỡ để giấu dáng"
+    ],
+    "zodiac": [
+      "Bạch Dương",
+      "Kim Ngưu",
+      "Song Tử",
+      "Cự Giải",
+      "Sư Tử",
+      "Xử Nữ",
+      "Thiên Bình",
+      "Bọ Cạp",
+      "Nhân Mã",
+      "Ma Kết",
+      "Bảo Bình",
+      "Song Ngư"
+    ],
+    "hobby": [
+      "Sửa đồng hồ cơ cũ vào mỗi tối cuối tuần",
+      "Ghi chép lại những câu thoại nghe lỏm ngoài quán nước",
+      "Chăm một góc xương rồng và cây không khí trên bậu cửa sổ",
+      "Chơi cờ vây một mình hoặc giải ô chữ bằng bút mực đen",
+      "Đi dạo dọc bờ sông lúc rạng sáng khi đường phố còn vắng tanh",
+      "Nấu ăn khuya thật cầu kỳ dù chỉ có một mình",
+      "Chụp ảnh phim trắng đen những góc hẻm sắp bị giải tỏa",
+      "Thu thập vé xe, hóa đơn cũ và kẹp theo ngày tháng vào sổ tay",
+      "Tự pha trà ô long theo đúng nhiệt độ nước rồi đọc sách giấy",
+      "Lắp ráp mô hình tàu thủy gỗ đòi hỏi sự kiên nhẫn hàng tháng trời"
+    ],
+    "flaw": [
+      "Cực kỳ thù dai và nhớ rất rõ từng lời hứa thất hẹn dù là chuyện nhỏ",
+      "Luôn đẩy người thân cận ra xa trước khi họ kịp nhìn thấy mặt yếu đuối",
+      "Quá tự tin vào khả năng kiểm soát tình huống nên hay xem nhẹ biến số",
+      "Nghiện công việc đến mức quên ăn quên ngủ và cáu gắt vô cớ",
+      "Không biết cách xin lỗi thẳng thắn, chỉ biết bù đắp bằng hành động vụng về",
+      "Dễ bị kích động khi ai đó chạm tới quá khứ gia đình",
+      "Thói quen nói dối những chuyện vặt vãnh chỉ để giữ vỏ bọc an toàn",
+      "Hay trì hoãn việc giải quyết mâu thuẫn tình cảm cho tới khi quá muộn",
+      "Quá nguyên tắc và khắt khe với cả bản thân lẫn người xung quanh",
+      "Liều lĩnh bất chấp hậu quả một khi đã cảm thấy bị dồn vào đường cùng"
+    ],
+    "signature_item": [
+      "Chiếc bật lửa đồng cũ khắc hai chữ cái mờ góc dưới",
+      "Cuốn sổ tay bìa da đen luôn nhét kèm một cây bút máy hết mực nửa chừng",
+      "Chiếc đồng hồ mặt nứt chạy chậm đúng ba phút",
+      "Cặp kính gọng kim loại mảnh chỉ đeo khi đọc tài liệu quan trọng",
+      "Vòng chỉ đỏ đã sờn màu buộc ở cổ tay trái",
+      "Chiếc máy ảnh film nhỏ treo thường trực bên hông áo khoác",
+      "Chìa khóa đồng nặng trịch không rõ mở cánh cửa nào",
+      "Gói kẹo bạc hà vị cay nồng luôn mang theo trong túi áo",
+      "Chiếc ô gập màu xám bạc có tay cầm gỗ đã mòn bóng",
+      "Chiếc USB kim loại nhỏ xâu cùng chìa khóa phòng trọ"
+    ]
+  }
+}

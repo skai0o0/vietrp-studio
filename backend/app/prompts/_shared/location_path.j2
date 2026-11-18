@@ -1,0 +1,36 @@
+{% set tension_labels = ["Rất thoải mái", "Bình thường", "Hơi căng", "Căng thẳng", "Rất căng"] %}
+[Bối cảnh hiện tại]
+{% if path %}
+Địa điểm: {{ path }}
+{% endif %}
+{% if location_description %}
+Mô tả địa điểm: {{ location_description }}
+{% endif %}
+{% if time %}
+Thời gian: {{ time }}
+{% endif %}
+Độ căng: {{ tension_labels[tension] }} ({{ tension }}/4)
+{% if scene and (scene.env or scene.chars or scene.items) %}
+[Trạng thái cảnh hiện tại]
+{% if scene.env %}
+Môi trường: {% for k, v in scene.env.items() %}{{ k }}: {{ v }}{% if not loop.last %}; {% endif %}{% endfor %}
+
+{% endif %}
+{% if scene.chars %}
+Trạng thái nhân vật:
+{% for cid, st in scene.chars.items() %}
+{% set fields = [] %}
+{% if st.mood %}{% set fields = fields + ["tâm trạng: " ~ st.mood] %}{% endif %}
+{% if st.outfit %}{% set fields = fields + ["trang phục: " ~ st.outfit] %}{% endif %}
+{% if st.pose %}{% set fields = fields + ["tư thế: " ~ st.pose] %}{% endif %}
+{% if st.holding %}{% set fields = fields + ["đang cầm: " ~ st.holding] %}{% endif %}
+{% if st.condition %}{% set fields = fields + ["tình trạng: " ~ st.condition] %}{% endif %}
+{% if fields %}
+- {{ char_names.get(cid, cid) }} ({{ cid }}): {{ fields | join("; ") }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if scene.items %}
+Đồ vật đáng chú ý: {{ scene.items | join("; ") }}
+{% endif %}
+{% endif %}

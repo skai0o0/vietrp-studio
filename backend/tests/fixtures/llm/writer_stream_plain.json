@@ -1,0 +1,6 @@
+{"vietrp_fixture":1,"match":{"path":"/api/v1/chat/completions","stream":true,"model":"deepseek/deepseek-v4.1-flash-1017"},"responses":[{"status":200,"sse":[
+ {"id":"gen-w3","choices":[{"delta":{"role":"assistant","content":""},"finish_reason":null}]},
+ {"id":"gen-w3","choices":[{"delta":{"content":"Mai ngẩng lên."},"finish_reason":null}]},
+ {"id":"gen-w3","choices":[{"delta":{"content":" \"Chào cậu.\""},"finish_reason":null}]},
+ {"id":"gen-w3","choices":[{"delta":{},"finish_reason":"stop"}]},
+ {"id":"gen-w3","choices":[],"usage":{"prompt_tokens":100,"completion_tokens":9,"cost":0.0002}}]}]}

@@ -1,0 +1,11 @@
+Ai nên lên tiếng hoặc hành động tiếp theo để câu chuyện tự nhiên nhất? Ưu tiên nhân vật mà {{ user }} vừa gọi tên hoặc nói chuyện trực tiếp; nếu {{ user }} không nói riêng với ai, ưu tiên nhân vật có mặt đã im lặng lâu (xem mục im lặng). Chọn người dẫn truyện khi cần mô tả cảnh, chuyển cảnh hoặc chưa có ai phù hợp.
+---
+{% for c in present %}
+{{ c.id }}: {{ c.name }}{% if c.tagline %}: {{ c.tagline }}{% endif %}
+
+{% endfor %}
+{% for c in arriving %}
+{{ c.id }}: {{ c.name }} (đang tới hoặc vừa được {{ user }} gọi vào){% if c.tagline %}: {{ c.tagline }}{% endif %}
+
+{% endfor %}
+narrator: Người dẫn truyện — mô tả cảnh, sự kiện, đưa nhân vật khác vào hoặc ra, cho nhân vật phụ nói

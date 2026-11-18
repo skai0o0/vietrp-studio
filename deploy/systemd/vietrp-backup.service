@@ -1,0 +1,32 @@
+# Daily pg_dump run, started by vietrp-backup.timer. Script: /opt/vietrp/deploy/scripts/backup.sh
+[Unit]
+Description=VietRP Studio daily pg_dump backup
+Wants=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=oneshot
+User=vietrp
+Group=vietrp
+WorkingDirectory=/opt/vietrp
+EnvironmentFile=/etc/vietrp/vietrp.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/bin/bash /opt/vietrp/deploy/scripts/backup.sh
+UMask=0077
+
+# Hardening. The only path this job may write is the backup directory.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/backups/vietrp

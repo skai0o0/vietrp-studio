@@ -1,0 +1,11 @@
+[Xưng hô & quan hệ]
+{% for bond in bonds %}
+- {{ bond.pair }}
+{%- if bond.fields.get('addressing') %}; xưng hô: {{ bond.fields.get('addressing') }}{% endif %}
+{%- if bond.fields.get('nickname') %}; biệt danh: {{ bond.fields.get('nickname') }}{% endif %}
+{%- if bond.fields.get('relationship') %}; quan hệ: {{ bond.fields.get('relationship') }}{% endif %}
+{%- if bond.fields.get('stance') %}; thái độ: {{ bond.fields.get('stance') }}{% endif %}
+{%- if bond.fields.get('closeness') %}; độ thân (0-4): {{ bond.fields.get('closeness') }}{% endif %}
+{%- if bond.fields.get('history') %}; quá khứ chung: {{ bond.fields.get('history') }}{% endif %}
+
+{% endfor %}

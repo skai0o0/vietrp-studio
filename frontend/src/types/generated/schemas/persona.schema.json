@@ -1,0 +1,79 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "age": {
+      "anyOf": [
+        {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Age"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "appearance": {
+      "default": "",
+      "title": "Appearance",
+      "type": "string"
+    },
+    "background": {
+      "default": "",
+      "title": "Background",
+      "type": "string"
+    },
+    "format": {
+      "const": "vietrp-persona",
+      "default": "vietrp-persona",
+      "title": "Format",
+      "type": "string"
+    },
+    "gender": {
+      "default": "",
+      "title": "Gender",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    },
+    "personality": {
+      "default": "",
+      "title": "Personality",
+      "type": "string"
+    },
+    "pronouns": {
+      "default": "",
+      "title": "Pronouns",
+      "type": "string"
+    },
+    "spec_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Spec Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "Persona",
+  "type": "object"
+}

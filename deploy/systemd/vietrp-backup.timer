@@ -1,0 +1,12 @@
+# Runs vietrp-backup.service every day at 03:30 local time.
+# Persistent=true runs a missed run at the next boot. RandomizedDelaySec spreads the start by up to 5 minutes.
+[Unit]
+Description=Daily VietRP Studio pg_dump backup timer
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,1 @@
+{"vietrp_fixture":1,"match":{"path":"/api/v1/chat/completions","contains":"Mã cặp: lan:user"},"responses":[{"status":200,"json":{"id":"gen-b2","choices":[{"message":{"role":"assistant","content":"Xin lỗi, tôi không thể."},"finish_reason":"stop"}],"usage":{"prompt_tokens":300,"completion_tokens":5}}}]}

@@ -1,0 +1,21 @@
+Loại mục tiêu: {{ "Nhân vật (vietrp-card)" if target_type == "character" else "Thực tại (vietrp-world)" }}
+
+{% if seed %}
+Hạt giống / các lựa chọn từ người dùng:
+{% for key, value in seed.items() %}
+{% if key != "target_type" and value %}
+- {{ key }}: {{ value }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if messages %}
+Lịch sử trao đổi với người dùng:
+{% for msg in messages %}
+{% if msg.get("role") in ("user", "assistant") and msg.get("content") %}
+[{{ "Người dùng" if msg.get("role") == "user" else "Creator" }}]: {{ msg.get("content") }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+Hãy tổng hợp toàn bộ thông tin trên thành bản phác thảo tiếng Việt hoàn chỉnh theo đúng định dạng yêu cầu.

@@ -1,0 +1,19 @@
+{% set tension_labels = ["Rất thoải mái", "Bình thường", "Hơi căng", "Căng thẳng", "Rất căng"] %}
+[TRẠNG THÁI TRƯỚC]
+Thực tại: {{ world_name }}
+{% if location_path %}
+Địa điểm: {{ location_path }}
+{% endif %}
+{% if time %}
+Thời gian: {{ time }}
+{% endif %}
+Có mặt: {{ user }}{% if present %}, {{ present | join(", ") }}{% endif %}
+
+Độ căng: {{ tension_labels[tension] }} ({{ tension }}/4)
+{% if recent %}
+
+[LƯỢT MỚI]
+{% for line in recent %}
+{{ line }}
+{% endfor %}
+{% endif %}

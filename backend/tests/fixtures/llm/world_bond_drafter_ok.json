@@ -1,0 +1,25 @@
+{
+  "vietrp_fixture": 1,
+  "match": {
+    "path": "/api/v1/chat/completions",
+    "contains": "Mã cặp: vy:han"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "json": {
+        "id": "gen-wb1",
+        "choices": [
+          {
+            "message": {
+              "role": "assistant",
+              "content": "{\"pairs\":{\"vy:user\":[{\"addressing\":\"tôi - cậu\",\"nickname\":\"\",\"relationship\":\"bạn cùng lớp\",\"stance\":\"thân thiện\",\"closeness\":2,\"history\":\"\"},{\"addressing\":\"mình - bạn\",\"nickname\":\"\",\"relationship\":\"người mới quen\",\"stance\":\"lịch sự\",\"closeness\":1,\"history\":\"\"}],\"han:user\":[{\"addressing\":\"tôi - cậu\",\"nickname\":\"\",\"relationship\":\"bạn học\",\"stance\":\"trầm tĩnh\",\"closeness\":1,\"history\":\"\"},{\"addressing\":\"em - anh\",\"nickname\":\"\",\"relationship\":\"đàn em\",\"stance\":\"dè dặt\",\"closeness\":1,\"history\":\"\"}],\"vy:han\":[{\"addressing\":\"mày - tao (muốn ghi đè)\",\"nickname\":\"Hân mọt sách\",\"relationship\":\"bạn thân (muốn ghi đè)\",\"stance\":\"hay trêu chọc\",\"closeness\":3,\"history\":\"học chung từ năm nhất\"},{\"addressing\":\"cậu - tớ\",\"nickname\":\"Hân\",\"relationship\":\"bạn bàn bên\",\"stance\":\"thoải mái\",\"closeness\":2,\"history\":\"\"}],\"han:vy\":[{\"addressing\":\"cậu - tôi\",\"nickname\":\"\",\"relationship\":\"bạn cùng lớp\",\"stance\":\"bình thản\",\"closeness\":3,\"history\":\"\"},{\"addressing\":\"bà - tui\",\"nickname\":\"Vy loi choi\",\"relationship\":\"chiến hữu\",\"stance\":\"vui vẻ\",\"closeness\":4,\"history\":\"\"}]}}"
+            },
+            "finish_reason": "stop"
+          }
+        ],
+        "usage": {"prompt_tokens": 620, "completion_tokens": 180, "cost": 0.0006}
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "entries": {
+    "0": {
+      "uid": 0,
+      "key": ["chợ", "vé số"],
+      "keysecondary": [],
+      "comment": "Chợ",
+      "content": "Chợ họp từ sáng sớm.",
+      "constant": true,
+      "selective": false,
+      "order": 100,
+      "position": 1,
+      "disable": false
+    },
+    "1": {
+      "uid": 1,
+      "key": ["ga tàu"],
+      "keysecondary": ["đêm"],
+      "comment": "Ga",
+      "content": "Ga tàu cũ.",
+      "constant": false,
+      "selective": true,
+      "order": 5,
+      "position": 0,
+      "disable": true
+    }
+  }
+}

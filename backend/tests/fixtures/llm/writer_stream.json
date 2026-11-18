@@ -1,0 +1,5 @@
+{"vietrp_fixture":1,"match":{"path":"/api/v1/chat/completions","stream":true,"model":"deepseek/deepseek-v4.1-flash-1017","contains":"Chỉ dẫn sửa"},"responses":[{"status":200,"sse":[
+ {"id":"gen-w2","choices":[{"delta":{"role":"assistant","content":""},"finish_reason":null}]},
+ {"id":"gen-w2","choices":[{"delta":{"content":"Mai mỉm cười."},"finish_reason":null}]},
+ {"id":"gen-w2","choices":[{"delta":{},"finish_reason":"stop"}]},
+ {"id":"gen-w2","choices":[],"usage":{"prompt_tokens":120,"completion_tokens":6,"cost":0.0001}}]}]}

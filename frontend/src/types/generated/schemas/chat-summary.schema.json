@@ -1,0 +1,188 @@
+{
+  "$defs": {
+    "CastMemberSummary": {
+      "description": "Summary of one cast member in a world chat.",
+      "properties": {
+        "avatar_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Avatar Url"
+        },
+        "character_id": {
+          "title": "Character Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "tagline": {
+          "default": "",
+          "title": "Tagline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "character_id",
+        "name"
+      ],
+      "title": "CastMemberSummary",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "avatar_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Avatar Url"
+    },
+    "cast": {
+      "items": {
+        "$ref": "#/$defs/CastMemberSummary"
+      },
+      "title": "Cast",
+      "type": "array"
+    },
+    "character_id": {
+      "default": "",
+      "title": "Character Id",
+      "type": "string"
+    },
+    "character_name": {
+      "default": "",
+      "title": "Character Name",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "forked_at_seq": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Forked At Seq"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "messages_count": {
+      "title": "Messages Count",
+      "type": "integer"
+    },
+    "mode": {
+      "enum": [
+        "single",
+        "world"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "opening_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opening Id"
+    },
+    "parent_chat_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Chat Id"
+    },
+    "persona_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Persona Id"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "world_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "World Id"
+    },
+    "world_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "World Name"
+    }
+  },
+  "required": [
+    "id",
+    "mode",
+    "title",
+    "persona_id",
+    "messages_count",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "ChatSummary",
+  "type": "object"
+}

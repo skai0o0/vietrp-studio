@@ -1,0 +1,25 @@
+[Người chơi: {{ name }}]
+{% if aliases %}
+Tên gọi khác: {{ aliases | join(", ") }}
+{% endif %}
+{% if age is not none %}
+Tuổi: {{ age }}
+{% endif %}
+{% if gender %}
+Giới tính: {{ gender }}
+{% endif %}
+{% if pronouns %}
+Cách xưng gọi mong muốn: {{ pronouns }}
+{% endif %}
+{% if appearance %}
+Ngoại hình: {{ appearance }}
+{% endif %}
+{% if personality %}
+Tính cách: {{ personality }}
+{% endif %}
+{% if background %}
+Quá khứ: {{ background }}
+{% endif %}
+{% if notes %}
+Ghi chú: {{ notes }}
+{% endif %}

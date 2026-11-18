@@ -1,0 +1,1 @@
+{"id":"gen-3","model":"deepseek/deepseek-v4.1-flash-1017","choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"{\"speaker\":{\"probabilities\":{\"mai\":3,\"narrator\":1}},\"lore__a\":{\"p\":0.7},\"tension\":{\"score\":9}}"}}],"usage":{"prompt_tokens":300,"completion_tokens":40,"cost":0.0003}}

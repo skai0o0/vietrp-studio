@@ -1,0 +1,64 @@
+# VietRP Studio API: uvicorn bound to 127.0.0.1:7880, behind cloudflared (Cloudflare Tunnel).
+# Install: copy to /etc/systemd/system/, then `systemctl daemon-reload` and `systemctl enable --now vietrp-api`.
+[Unit]
+Description=VietRP Studio API (uvicorn)
+Wants=network-online.target postgresql.service
+After=network-online.target postgresql.service
+# Restart storms stop after 5 failed starts in 5 minutes.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=vietrp
+Group=vietrp
+WorkingDirectory=/opt/vietrp/backend
+# Holds DATABASE_URL, VIETRP_SERVER_PEPPER, VIETRP_SESSION_SECRET. Root-owned, mode 600.
+# Values in this file override the Environment= lines below.
+EnvironmentFile=/etc/vietrp/vietrp.env
+Environment=VIETRP_ENV=prod
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+# tiktoken caches its encoding file here (CacheDirectory below creates it).
+Environment=TIKTOKEN_CACHE_DIR=/var/cache/vietrp
+
+# Migrations run before every start, so the schema always matches the deployed code.
+# If a migration fails, the service does not start.
+ExecStartPre=/opt/vietrp/backend/.venv/bin/alembic -c /opt/vietrp/backend/alembic.ini upgrade head
+# --workers 1 is required: vault sessions and the DEK live in this process's RAM (AGENTS.md 4.7).
+# --forwarded-allow-ips=127.0.0.1 trusts proxy headers only from cloudflared on loopback.
+ExecStart=/opt/vietrp/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 7880 --workers 1 --proxy-headers --forwarded-allow-ips=127.0.0.1 --timeout-graceful-shutdown 20
+
+Restart=on-failure
+RestartSec=5
+# Gives open SSE streams time to close on stop or restart.
+KillMode=mixed
+TimeoutStopSec=30
+UMask=0077
+
+# Hardening. The app writes nothing except its cache directory, so there are no ReadWritePaths.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+CacheDirectory=vietrp
+
+[Install]
+WantedBy=multi-user.target

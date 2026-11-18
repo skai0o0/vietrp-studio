@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "CardJudgeCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "hint_vi": {
+          "default": "",
+          "title": "Hint Vi",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "probability",
+        "passed"
+      ],
+      "title": "CardJudgeCriterion",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "criteria": {
+      "items": {
+        "$ref": "#/$defs/CardJudgeCriterion"
+      },
+      "title": "Criteria",
+      "type": "array"
+    },
+    "passed": {
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Score",
+      "type": "number"
+    },
+    "threshold": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Threshold",
+      "type": "number"
+    }
+  },
+  "required": [
+    "passed",
+    "score",
+    "threshold",
+    "criteria"
+  ],
+  "title": "CardJudgeResult",
+  "type": "object"
+}

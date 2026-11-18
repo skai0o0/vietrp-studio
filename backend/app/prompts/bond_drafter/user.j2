@@ -1,0 +1,21 @@
+{% for pair in pairs %}
+Mã cặp: {{ pair.pair_id }}
+{{ pair.character_name }} đối với {{ pair.other_name }} ({{ "người chơi" if pair.other_kind == "persona" else "nhân vật khác" }})
+{% if pair.character_brief %}
+Về {{ pair.character_name }}: {{ pair.character_brief }}
+{% endif %}
+{% if pair.other_brief %}
+Về {{ pair.other_name }}: {{ pair.other_brief }}
+{% endif %}
+{% if pair.pinned %}
+Đã ghim, không đổi:
+{% for key, value in pair.pinned.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% if opening %}
+Lời mở đầu của cảnh:
+{{ opening }}
+{% endif %}

@@ -1,0 +1,539 @@
+{
+  "$defs": {
+    "CardJudgeCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "hint_vi": {
+          "default": "",
+          "title": "Hint Vi",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "probability",
+        "passed"
+      ],
+      "title": "CardJudgeCriterion",
+      "type": "object"
+    },
+    "CardJudgeResult": {
+      "additionalProperties": false,
+      "properties": {
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/CardJudgeCriterion"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "threshold": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Threshold",
+          "type": "number"
+        }
+      },
+      "required": [
+        "passed",
+        "score",
+        "threshold",
+        "criteria"
+      ],
+      "title": "CardJudgeResult",
+      "type": "object"
+    },
+    "CreatorDeltaEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "delta": {
+          "title": "Delta",
+          "type": "string"
+        },
+        "type": {
+          "const": "delta",
+          "default": "delta",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "delta"
+      ],
+      "title": "CreatorDeltaEvent",
+      "type": "object"
+    },
+    "CreatorDoneEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "session": {
+          "$ref": "#/$defs/CreatorSessionOut"
+        },
+        "type": {
+          "const": "done",
+          "default": "done",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session"
+      ],
+      "title": "CreatorDoneEvent",
+      "type": "object"
+    },
+    "CreatorErrorEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "type": {
+          "const": "error",
+          "default": "error",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "CreatorErrorEvent",
+      "type": "object"
+    },
+    "CreatorFormattedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "type": {
+          "const": "formatted",
+          "default": "formatted",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "CreatorFormattedEvent",
+      "type": "object"
+    },
+    "CreatorJudgedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "judge_score": {
+          "$ref": "#/$defs/CardJudgeResult"
+        },
+        "type": {
+          "const": "judged",
+          "default": "judged",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "judge_score"
+      ],
+      "title": "CreatorJudgedEvent",
+      "type": "object"
+    },
+    "CreatorMessage": {
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "assistant"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "CreatorMessage",
+      "type": "object"
+    },
+    "CreatorMessageEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "$ref": "#/$defs/CreatorMessage"
+        },
+        "type": {
+          "const": "message",
+          "default": "message",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "title": "CreatorMessageEvent",
+      "type": "object"
+    },
+    "CreatorRawEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "raw": {
+          "title": "Raw",
+          "type": "string"
+        },
+        "type": {
+          "const": "raw",
+          "default": "raw",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "raw"
+      ],
+      "title": "CreatorRawEvent",
+      "type": "object"
+    },
+    "CreatorSessionOut": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/CreatorMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "slots",
+            "chat"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "seed": {
+          "additionalProperties": true,
+          "title": "Seed",
+          "type": "object"
+        },
+        "target_type": {
+          "enum": [
+            "character",
+            "world"
+          ],
+          "title": "Target Type",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "mode",
+        "target_type",
+        "seed",
+        "messages",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "CreatorSessionOut",
+      "type": "object"
+    },
+    "CreatorValidatedEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "type": {
+          "const": "validated",
+          "default": "validated",
+          "title": "Type",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/FormatWarning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "CreatorValidatedEvent",
+      "type": "object"
+    },
+    "FormatWarning": {
+      "description": "A soft issue found during validation; never blocks a write.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "code",
+        "message"
+      ],
+      "title": "FormatWarning",
+      "type": "object"
+    },
+    "NoticeEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "type": {
+          "const": "notice",
+          "default": "notice",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "NoticeEvent",
+      "type": "object"
+    },
+    "PingEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "ping",
+          "default": "ping",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "PingEvent",
+      "type": "object"
+    },
+    "UsageEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "completion_tokens": {
+          "minimum": 0,
+          "title": "Completion Tokens",
+          "type": "integer"
+        },
+        "cost": {
+          "minimum": 0.0,
+          "title": "Cost",
+          "type": "number"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_tokens": {
+          "minimum": 0,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "reasoning_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Reasoning Tokens",
+          "type": "integer"
+        },
+        "type": {
+          "const": "usage",
+          "default": "usage",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "model",
+        "prompt_tokens",
+        "completion_tokens",
+        "cost"
+      ],
+      "title": "UsageEvent",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Object-rooted wrapper so the exported JSON Schema has an object root.",
+  "properties": {
+    "event": {
+      "discriminator": {
+        "mapping": {
+          "delta": "#/$defs/CreatorDeltaEvent",
+          "done": "#/$defs/CreatorDoneEvent",
+          "error": "#/$defs/CreatorErrorEvent",
+          "formatted": "#/$defs/CreatorFormattedEvent",
+          "judged": "#/$defs/CreatorJudgedEvent",
+          "message": "#/$defs/CreatorMessageEvent",
+          "notice": "#/$defs/NoticeEvent",
+          "ping": "#/$defs/PingEvent",
+          "raw": "#/$defs/CreatorRawEvent",
+          "usage": "#/$defs/UsageEvent",
+          "validated": "#/$defs/CreatorValidatedEvent"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/CreatorDeltaEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorMessageEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorRawEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorFormattedEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorValidatedEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorJudgedEvent"
+        },
+        {
+          "$ref": "#/$defs/NoticeEvent"
+        },
+        {
+          "$ref": "#/$defs/UsageEvent"
+        },
+        {
+          "$ref": "#/$defs/PingEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorDoneEvent"
+        },
+        {
+          "$ref": "#/$defs/CreatorErrorEvent"
+        }
+      ],
+      "title": "Event"
+    }
+  },
+  "required": [
+    "event"
+  ],
+  "title": "CreatorEventDoc",
+  "type": "object"
+}

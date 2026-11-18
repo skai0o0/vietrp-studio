@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "agent": {
+      "enum": [
+        "orchestrator",
+        "writer",
+        "director",
+        "state_keeper",
+        "archivist",
+        "creator",
+        "card_judge",
+        "bond_drafter",
+        "bond_selector"
+      ],
+      "title": "Agent",
+      "type": "string"
+    },
+    "layers": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Layers",
+      "type": "object"
+    },
+    "name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent",
+    "name"
+  ],
+  "title": "PresetIn",
+  "type": "object"
+}

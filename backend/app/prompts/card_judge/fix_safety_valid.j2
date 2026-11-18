@@ -1,0 +1,11 @@
+{% if reason == "missing_age" -%}
+Điền tuổi là số nguyên không âm (tuổi >= 0) cho nhân vật trước khi đưa vào chat.
+{%- elif reason == "non_fictional" -%}
+Nhân vật bắt buộc phải đánh dấu là hư cấu (is_fictional = true).
+{%- elif reason == "minor_nsfw_public" -%}
+Card công khai có nhân vật dưới 18 tuổi không được gắn tag NSFW.
+{%- elif reason == "world_incomplete" -%}
+Thực tại bắt buộc phải có tên và ít nhất một địa điểm hợp lệ.
+{%- else -%}
+Kiểm tra lại độ tuổi hợp lệ, tính hư cấu và đảm bảo không có nội dung tình dục/lãng mạn với nhân vật dưới 18 tuổi.
+{%- endif %}

@@ -1,0 +1,238 @@
+{
+  "$defs": {
+    "Addressing": {
+      "additionalProperties": false,
+      "properties": {
+        "by_character": {
+          "patternProperties": {
+            "^[a-z0-9_]{1,40}$": {
+              "type": "string"
+            }
+          },
+          "title": "By Character",
+          "type": "object"
+        },
+        "default": {
+          "default": "",
+          "title": "Default",
+          "type": "string"
+        },
+        "user": {
+          "default": "",
+          "title": "User",
+          "type": "string"
+        }
+      },
+      "title": "Addressing",
+      "type": "object"
+    },
+    "Relationships": {
+      "additionalProperties": false,
+      "properties": {
+        "by_character": {
+          "patternProperties": {
+            "^[a-z0-9_]{1,40}$": {
+              "type": "string"
+            }
+          },
+          "title": "By Character",
+          "type": "object"
+        },
+        "user": {
+          "default": "",
+          "title": "User",
+          "type": "string"
+        }
+      },
+      "title": "Relationships",
+      "type": "object"
+    },
+    "Secret": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9_]{1,40}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "reveal_when": {
+          "default": "",
+          "title": "Reveal When",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ],
+      "title": "Secret",
+      "type": "object"
+    },
+    "Speech": {
+      "additionalProperties": false,
+      "properties": {
+        "catchphrases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Catchphrases",
+          "type": "array"
+        },
+        "examples": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Examples",
+          "type": "array"
+        },
+        "style": {
+          "default": "",
+          "title": "Style",
+          "type": "string"
+        }
+      },
+      "title": "Speech",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "addressing": {
+      "$ref": "#/$defs/Addressing"
+    },
+    "age": {
+      "anyOf": [
+        {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Age"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "appearance": {
+      "default": "",
+      "title": "Appearance",
+      "type": "string"
+    },
+    "backstory": {
+      "default": "",
+      "title": "Backstory",
+      "type": "string"
+    },
+    "extras": {
+      "patternProperties": {
+        "^[a-z0-9_]{1,40}$": {
+          "type": "string"
+        }
+      },
+      "title": "Extras",
+      "type": "object"
+    },
+    "format": {
+      "const": "vietrp-card",
+      "default": "vietrp-card",
+      "title": "Format",
+      "type": "string"
+    },
+    "goals": {
+      "default": "",
+      "title": "Goals",
+      "type": "string"
+    },
+    "greetings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Greetings",
+      "type": "array"
+    },
+    "is_fictional": {
+      "const": true,
+      "default": true,
+      "title": "Is Fictional",
+      "type": "boolean"
+    },
+    "limits": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limits",
+      "type": "array"
+    },
+    "lorebook_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Lorebook Ids",
+      "type": "array"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "personality": {
+      "default": "",
+      "title": "Personality",
+      "type": "string"
+    },
+    "relationships": {
+      "$ref": "#/$defs/Relationships"
+    },
+    "secrets": {
+      "items": {
+        "$ref": "#/$defs/Secret"
+      },
+      "title": "Secrets",
+      "type": "array"
+    },
+    "spec_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Spec Version",
+      "type": "string"
+    },
+    "speech": {
+      "$ref": "#/$defs/Speech"
+    },
+    "tagline": {
+      "default": "",
+      "maxLength": 140,
+      "title": "Tagline",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "maxLength": 32,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Tags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "VietrpCard",
+  "type": "object"
+}

@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "CreatorMessage": {
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "assistant"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "content"
+      ],
+      "title": "CreatorMessage",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "messages": {
+      "items": {
+        "$ref": "#/$defs/CreatorMessage"
+      },
+      "title": "Messages",
+      "type": "array"
+    },
+    "mode": {
+      "enum": [
+        "slots",
+        "chat"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "raw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result"
+    },
+    "seed": {
+      "additionalProperties": true,
+      "title": "Seed",
+      "type": "object"
+    },
+    "target_type": {
+      "enum": [
+        "character",
+        "world"
+      ],
+      "title": "Target Type",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "mode",
+    "target_type",
+    "seed",
+    "messages",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "CreatorSessionOut",
+  "type": "object"
+}

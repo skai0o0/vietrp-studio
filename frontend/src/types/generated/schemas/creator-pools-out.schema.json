@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "character": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": "object"
+      },
+      "title": "Character",
+      "type": "object"
+    },
+    "world": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": "object"
+      },
+      "title": "World",
+      "type": "object"
+    }
+  },
+  "required": [
+    "character",
+    "world"
+  ],
+  "title": "CreatorPoolsOut",
+  "type": "object"
+}

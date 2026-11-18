@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="vi" data-theme="oled-neon">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <title>VietRP Studio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      // Apply the stored theme before first paint. Keep the key in sync with src/app/theme.ts.
+      try {
+        var stored = localStorage.getItem("vietrp.theme");
+        if (stored === "oled-neon" || stored === "e-ink") {
+          document.documentElement.setAttribute("data-theme", stored);
+        }
+      } catch (_e) {
+        /* storage unavailable: keep the default theme */
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

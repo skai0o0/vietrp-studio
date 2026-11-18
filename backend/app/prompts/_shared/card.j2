@@ -1,0 +1,55 @@
+[Nhân vật: {{ name }}, {{ age }} tuổi]
+{% if aliases %}
+Tên gọi khác: {{ aliases | join(", ") }}
+{% endif %}
+{% if f.appearance %}
+Ngoại hình: {{ f.appearance }}
+{% endif %}
+{% if f.personality %}
+Tính cách: {{ f.personality }}
+{% endif %}
+{% if f.backstory %}
+Quá khứ: {{ f.backstory }}
+{% endif %}
+{% if f.goals %}
+Mục tiêu: {{ f.goals }}
+{% endif %}
+{% if f.limits %}
+Giới hạn: {{ f.limits | join("; ") }}
+{% endif %}
+{% if f.speech %}
+{% if f.speech.style %}
+Giọng nói: {{ f.speech.style }}
+{% endif %}
+{% if f.speech.catchphrases %}
+Câu cửa miệng: {{ f.speech.catchphrases | join("; ") }}
+{% endif %}
+{% for example in f.speech.examples %}
+Ví dụ lời thoại: {{ example }}
+{% endfor %}
+{% endif %}
+{% if f.addressing %}
+{% if f.addressing.default %}
+Xưng hô thường ngày: {{ f.addressing.default }}
+{% endif %}
+{% if f.addressing.user %}
+Gọi người chơi là: {{ f.addressing.user }}
+{% endif %}
+{% for other, how in f.addressing.by_character.items() %}
+Gọi {{ other }} là: {{ how }}
+{% endfor %}
+{% endif %}
+{% if f.relationships %}
+{% if f.relationships.user %}
+Quan hệ với người chơi: {{ f.relationships.user }}
+{% endif %}
+{% for other, how in f.relationships.by_character.items() %}
+Quan hệ với {{ other }}: {{ how }}
+{% endfor %}
+{% endif %}
+{% for key, value in f.extras.items() %}
+{{ key }}: {{ value }}
+{% endfor %}
+{% for secret in f.secrets %}
+Bí mật (chỉ tiết lộ khi {{ secret.reveal_when or "thật sự cần thiết" }}): {{ secret.content }}
+{% endfor %}

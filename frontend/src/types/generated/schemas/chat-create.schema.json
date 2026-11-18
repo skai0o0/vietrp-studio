@@ -1,0 +1,335 @@
+{
+  "$defs": {
+    "AgentModels": {
+      "additionalProperties": false,
+      "description": "Per-agent model id overrides. None keeps the default from `llm/defaults.py`.",
+      "properties": {
+        "archivist": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Archivist"
+        },
+        "bond_drafter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bond Drafter"
+        },
+        "bond_selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bond Selector"
+        },
+        "card_judge": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Card Judge"
+        },
+        "creator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Creator"
+        },
+        "director": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Director"
+        },
+        "orchestrator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Orchestrator"
+        },
+        "state_keeper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State Keeper"
+        },
+        "writer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Writer"
+        }
+      },
+      "title": "AgentModels",
+      "type": "object"
+    },
+    "ChatSettings": {
+      "additionalProperties": false,
+      "description": "Per-chat overrides of the user's global settings (architecture 3.1).",
+      "properties": {
+        "director": {
+          "$ref": "#/$defs/DirectorSettings"
+        },
+        "group": {
+          "$ref": "#/$defs/GroupSettings"
+        },
+        "lorebook": {
+          "$ref": "#/$defs/LorebookSettings"
+        },
+        "memory": {
+          "$ref": "#/$defs/MemorySettings"
+        },
+        "models": {
+          "$ref": "#/$defs/AgentModels"
+        },
+        "nsfw": {
+          "default": false,
+          "title": "Nsfw",
+          "type": "boolean"
+        }
+      },
+      "title": "ChatSettings",
+      "type": "object"
+    },
+    "DirectorSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "stream_mode": {
+          "default": "draft_then_replace",
+          "enum": [
+            "draft_then_replace",
+            "hold_until_approved"
+          ],
+          "title": "Stream Mode",
+          "type": "string"
+        }
+      },
+      "title": "DirectorSettings",
+      "type": "object"
+    },
+    "GroupSettings": {
+      "additionalProperties": false,
+      "description": "World chat only (P3); defined now so settings stay one shape.",
+      "properties": {
+        "chain_max": {
+          "default": 3,
+          "minimum": 1,
+          "title": "Chain Max",
+          "type": "integer"
+        },
+        "write_mode": {
+          "default": "per_character",
+          "enum": [
+            "per_character",
+            "single_call"
+          ],
+          "title": "Write Mode",
+          "type": "string"
+        }
+      },
+      "title": "GroupSettings",
+      "type": "object"
+    },
+    "LorebookSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "hybrid",
+          "enum": [
+            "hybrid",
+            "keyword",
+            "ai"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "LorebookSettings",
+      "type": "object"
+    },
+    "MemorySettings": {
+      "additionalProperties": false,
+      "properties": {
+        "context_length": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Length"
+        },
+        "summarize_at": {
+          "default": 0.8,
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Summarize At",
+          "type": "number"
+        }
+      },
+      "title": "MemorySettings",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cast_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Cast Ids",
+      "type": "array"
+    },
+    "character_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Character Id"
+    },
+    "greeting_index": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Greeting Index",
+      "type": "integer"
+    },
+    "mode": {
+      "default": "single",
+      "enum": [
+        "single",
+        "world"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "opening_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opening Id"
+    },
+    "persona_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Persona Id"
+    },
+    "settings": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChatSettings"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
+    "world_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "World Id"
+    }
+  },
+  "title": "ChatCreate",
+  "type": "object"
+}

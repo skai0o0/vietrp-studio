@@ -1,0 +1,19 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "prefill": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prefill"
+    }
+  },
+  "title": "ContinueRequest",
+  "type": "object"
+}

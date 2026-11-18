@@ -1,0 +1,118 @@
+{
+  "carousels": {
+    "world_rules": [
+      "Đời thường hiện đại không siêu nhiên: mọi hành động đều tuân theo quy luật vật lý, tâm lý và ràng buộc xã hội thực tế.",
+      "Dị năng tồn tại ngầm giữa đô thị hiện đại: người thường không biết, mọi vụ việc siêu nhiên được một cục giám sát giấu kín.",
+      "Ma pháp vận hành theo nguyên tắc đánh đổi tương đương: phép càng mạnh thì cái giá về ký ức, tuổi thọ hoặc thể lực càng lớn.",
+      "Tu chân phân tầng nghiêm ngặt theo cảnh giới linh khí: thế lực tông môn chi phối cả triều đình lẫn thương hội.",
+      "Công nghệ cấy ghép thần kinh phổ biến đại trà, nhưng kéo theo chứng phân rã nhân cách nếu vượt ngưỡng chịu tải.",
+      "Mỗi khu vực bị bao phủ bởi sương mù dị thường vào ban đêm; đèn đường tắt là ranh giới giữa an toàn và mất tích.",
+      "Lịch sử rẽ nhánh theo hướng hơi nước và cơ khí đồng hồ: năng lượng chạy bằng khoáng thạch quý hiếm đang dần cạn kiệt.",
+      "Sau thảm họa khí hậu, loài người sống co cụm trong các thành phố mái vòm; ngoài tường thành là vùng hoang dã biến dị.",
+      "Thế giới giả lập nhiều tầng nơi ký ức có thể sao lưu và mua bán như hàng hóa hợp pháp lẫn chợ đen.",
+      "Vũ trụ liên hành tinh nối nhau bằng cổng nhảy lượng tử; các tập đoàn khai thác nắm quyền lực ngang chính phủ."
+    ],
+    "genre_trope": [
+      "Slice of life đô thị: nhịp sống chậm, quán cà phê mưa, chung cư cũ và những câu chuyện đời thường tinh tế.",
+      "Học đường hiện đại: ký túc xá, câu lạc bộ sau giờ học, áp lực thi cử và những bí mật tuổi trưởng thành.",
+      "Trinh thám noir: thành phố đèn neon ướt mưa, hồ sơ nguội, những màn mặc cả mờ ám và ranh giới đạo đức mong manh.",
+      "Cyberpunk đô thị ngầm: siêu tập đoàn, hacker, chợ linh kiện sinh học và khoảng cách giàu nghèo khắc nghiệt.",
+      "Tu tiên tông môn: bí cảnh tranh đoạt, truyền thừa cổ xưa, ân oán sư môn và thử thách tâm ma.",
+      "Cổ trang triều chính: kinh thành phồn hoa, đấu trí gia tộc, mật vụ triều đình và những bức thư không ký tên.",
+      "Kinh dị tâm linh dân gian: làng cổ ven sông, tập tục cấm kỵ, truyền thuyết truyền miệng và những đêm rằm bất an.",
+      "Hậu tận thế sinh tồn: trạm tiếp tế di động, khan hiếm nước sạch, các nhóm sống sót dè chừng lẫn nhau.",
+      "Isekai chuyển sinh kỳ ảo: lục địa nhiều chủng tộc, hội mạo hiểm giả và xung đột giữa ma pháp cổ với kiến thức mới.",
+      "Đô thị dị năng học viện: nơi các cá nhân mang năng lực đặc biệt được đào tạo bí mật song song với đời sống sinh viên."
+    ],
+    "tone": [
+      "Trầm lắng, nhiều khoảng lặng và suy tư nội tâm, thiên về cảm xúc tinh tế hơn là kịch tính ồn ào.",
+      "Căng thẳng trinh thám: chậm rãi siết vòng vây, mỗi cuộc đối thoại đều tiềm ẩn lớp nghĩa thứ hai.",
+      "Ấm áp đời thường: nhẹ nhàng, gần gũi, hài hước duyên dáng nhưng vẫn có chiều sâu tâm lý.",
+      "U tối ngột ngạt: đầy rẫy toan tính, tin tưởng là thứ xa xỉ và mọi lựa chọn đều có cái giá phải trả.",
+      "Hào sảng phiêu lưu: nhịp độ nhanh, giàu tinh thần khám phá, đặt nặng tình đồng đội và thử thách bản lĩnh.",
+      "Hoài niệm u buồn: nhuốm màu quá khứ, những khu phố cũ và điều dang dở khó gọi thành tên.",
+      "Châm biếm sắc bén: phơi bày mặt trái hào nhoáng của xã hội hiện đại qua góc nhìn tỉnh táo.",
+      "Lạnh lẽo siêu thực: ranh giới giữa thực tại và ảo giác mờ nhòe, buộc người trong cuộc tự kiểm chứng.",
+      "Kịch tính sinh tồn: tài nguyên có hạn, thời gian đếm ngược, buộc phải quyết định nhanh trong áp lực.",
+      "Lãng mạn dịu nhẹ: tập trung vào sự thấu hiểu chậm rãi giữa những con người mang nhiều vết xước."
+    ],
+    "starting_situation": [
+      "Cơn mưa rào bất chợt giữ chân mọi người lại cùng một mái hiên hoặc quán nước mở muộn.",
+      "Một lá thư hoặc tin nhắn nặc danh hẹn gặp đúng nửa đêm tại địa điểm tưởng như đã bị bỏ hoang.",
+      "Chuyến tàu cuối cùng trong ngày bất ngờ dừng khẩn cấp giữa hai trạm vì sự cố không được thông báo.",
+      "Ngày đầu tiên người chơi chuyển tới nhận việc hoặc nhận phòng tại một khu tập thể đầy quy tắc ngầm.",
+      "Mất điện toàn khu vực đúng lúc một cuộc giao dịch hoặc cuộc họp quan trọng sắp ngã ngũ.",
+      "Cả nhóm vô tình phát hiện một căn phòng khóa kín hoặc tài liệu không khớp với hồ sơ công khai.",
+      "Lễ hội thường niên đông đúc bỗng náo loạn khi một nhân vật chủ chốt biến mất không dấu vết.",
+      "Một người lạ mặt bước vào với vết thương chưa kịp băng bó và đặt lên bàn một món đồ gây tranh cãi.",
+      "Đơn vị hoặc tổ chức nhận được lệnh triệu tập khẩn cấp ngay trước kỳ nghỉ hiếm hoi trong năm.",
+      "Cuộc gặp mặt tình cờ sau nhiều năm mất liên lạc diễn ra ngay giữa một tình huống trớ trêu khó tránh."
+    ]
+  },
+  "slots": {
+    "era": [
+      "Hiện đại thập niên 2020",
+      "Thập niên 1990 hoài cổ",
+      "Tương lai gần (thập niên 2040)",
+      "Tương lai xa thời kỳ liên hành tinh",
+      "Phong kiến Á Đông giả tưởng",
+      "Thời kỳ hơi nước cuối thế kỷ 19",
+      "Trung cổ phương Tây kỳ ảo",
+      "Hậu tận thế năm thứ 30",
+      "Đương đại rẽ nhánh lịch sử",
+      "Thời cổ đại thần thoại"
+    ],
+    "tech_level": [
+      "Tiền công nghiệp / thủ công",
+      "Cơ khí hơi nước & bánh răng",
+      "Hiện đại phổ thông (internet, smartphone)",
+      "Hiện đại tiên tiến (AI cục bộ, drone)",
+      "Cyberpunk cao cấp (cấy ghép thần kinh)",
+      "Khoa học viễn tưởng du hành vũ trụ",
+      "Công nghệ sụp đổ, tái chế chắp vá",
+      "Kết hợp linh thạch với máy móc cơ khí"
+    ],
+    "magic_level": [
+      "Không phép thuật (thuần thực tế)",
+      "Tin đồn tâm linh mơ hồ, không kiểm chứng",
+      "Phép thuật thấp, ẩn giấu trong bóng tối",
+      "Dị năng hiếm, giới hạn một số huyết mạch",
+      "Phép thuật trung bình, phổ biến trong giới học giả",
+      "Tu luyện và linh khí là nền tảng xã hội",
+      "Phép thuật cao cấp thay thế hoàn toàn công nghệ",
+      "Thế lực thần bí chi phối trực tiếp vận mệnh"
+    ],
+    "climate": [
+      "Nhiệt đới gió mùa, mưa rào chiều bất chợt",
+      "Bốn mùa ôn hòa, mùa thu nhiều sương sớm",
+      "Mưa phùn lạnh kéo dài quanh năm",
+      "Nóng ẩm ngột ngạt, đêm xuống mới dịu gió",
+      "Mùa đông khắc nghiệt phủ tuyết dày",
+      "Khô cằn bán sa mạc, đêm xuống lạnh buốt",
+      "Khí hậu nhân tạo ổn định bên trong mái vòm",
+      "Thời tiết thất thường do dị biến địa từ"
+    ],
+    "opening_place": [
+      "Quán cà phê góc phố đèn vàng",
+      "Căn tin khu nội trú giờ nghỉ trưa",
+      "Nhà ga cũ vắng khách lúc nửa đêm",
+      "Thư viện cổ tầng hầm khóa cửa",
+      "Sân thượng chung cư cũ lộng gió",
+      "Văn phòng thám tử bừa bộn hồ sơ",
+      "Quán trọ bên bìa rừng sương mù",
+      "Phòng thí nghiệm ngầm ánh sáng xanh",
+      "Bến cảng container lúc rạng sáng",
+      "Hẻm ẩm ướt lấp lánh ánh đèn neon"
+    ],
+    "root_level": [
+      "galaxy",
+      "star_system",
+      "planet",
+      "country",
+      "province",
+      "district",
+      "area",
+      "place"
+    ]
+  }
+}

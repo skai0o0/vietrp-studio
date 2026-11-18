@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "raw": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw"
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Seed"
+    },
+    "skip_raw": {
+      "default": false,
+      "title": "Skip Raw",
+      "type": "boolean"
+    }
+  },
+  "title": "CreatorGenerateIn",
+  "type": "object"
+}

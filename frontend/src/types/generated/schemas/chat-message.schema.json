@@ -1,0 +1,172 @@
+{
+  "$defs": {
+    "DirectorCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "hint_vi": {
+          "default": "",
+          "title": "Hint Vi",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "probability": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "probability",
+        "passed"
+      ],
+      "title": "DirectorCriterion",
+      "type": "object"
+    },
+    "DirectorVerdict": {
+      "additionalProperties": false,
+      "description": "Director result; reused by the `director` event and by stored message variants.",
+      "properties": {
+        "attempt": {
+          "minimum": 0,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/DirectorCriterion"
+          },
+          "title": "Criteria",
+          "type": "array"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "passed",
+        "score",
+        "criteria",
+        "attempt"
+      ],
+      "title": "DirectorVerdict",
+      "type": "object"
+    },
+    "MessageVariantOut": {
+      "properties": {
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "director": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DirectorVerdict"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "draft": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Draft"
+        },
+        "idx": {
+          "minimum": 0,
+          "title": "Idx",
+          "type": "integer"
+        },
+        "stopped": {
+          "default": false,
+          "title": "Stopped",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "idx",
+        "content",
+        "created_at"
+      ],
+      "title": "MessageVariantOut",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "active_variant": {
+      "minimum": 0,
+      "title": "Active Variant",
+      "type": "integer"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "meta": {
+      "additionalProperties": true,
+      "title": "Meta",
+      "type": "object"
+    },
+    "seq": {
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "speaker": {
+      "title": "Speaker",
+      "type": "string"
+    },
+    "variants": {
+      "items": {
+        "$ref": "#/$defs/MessageVariantOut"
+      },
+      "title": "Variants",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "seq",
+    "speaker",
+    "active_variant",
+    "variants",
+    "meta",
+    "created_at"
+  ],
+  "title": "MessageOut",
+  "type": "object"
+}

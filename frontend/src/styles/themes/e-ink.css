@@ -1,0 +1,51 @@
+/* E-ink: paper white, black text, 1px borders. No glow, shadow, gradient or motion. */
+[data-theme="e-ink"] {
+  color-scheme: light;
+  --bg: 250 249 245;
+  --surface: 244 243 238;
+  --surface-2: 232 231 225;
+  --border: 0 0 0;
+  --text: 0 0 0;
+  --text-muted: 70 70 70;
+  --accent: 0 0 0;
+  --accent-2: 0 0 0;
+  --accent-fg: 250 249 245;
+  --danger: 0 0 0;
+  --focus: 0 0 0;
+  --glow: none;
+  --radius: 0.25rem;
+  --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-content: "Noto Serif", Georgia, serif;
+  --motion: 0;
+}
+
+[data-theme="e-ink"] *,
+[data-theme="e-ink"] *::before,
+[data-theme="e-ink"] *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Token bar steps without colour: thin solid -> dashed -> thick -> inverted (full). */
+[data-theme="e-ink"] .token-bar-track[data-level="warn"] {
+  height: 0.5rem;
+}
+[data-theme="e-ink"] .token-bar-track[data-level="full"] {
+  height: 0.75rem;
+  outline: 2px solid rgb(var(--text));
+  outline-offset: 1px;
+}
+[data-theme="e-ink"] .token-bar-fill[data-level="notice"] {
+  background: transparent;
+  border-top: 4px dashed rgb(var(--text));
+  border-bottom: 0;
+}
+[data-theme="e-ink"] .token-bar-fill[data-level="warn"] {
+  background: rgb(var(--text));
+}
+[data-theme="e-ink"] .token-bar-fill[data-level="full"] {
+  background: rgb(var(--text));
+}

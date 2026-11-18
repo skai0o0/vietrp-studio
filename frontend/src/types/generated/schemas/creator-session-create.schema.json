@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "mode": {
+      "enum": [
+        "slots",
+        "chat"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "seed": {
+      "additionalProperties": true,
+      "title": "Seed",
+      "type": "object"
+    },
+    "target_type": {
+      "enum": [
+        "character",
+        "world"
+      ],
+      "title": "Target Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mode",
+    "target_type"
+  ],
+  "title": "CreatorSessionCreate",
+  "type": "object"
+}

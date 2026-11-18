@@ -1,0 +1,6 @@
+Cảnh hiện đang diễn ra ở địa điểm nào sau các lượt mới?
+---
+{% for loc in locations %}
+{{ loc.id }}: {{ loc.name }}{% if loc.description %} — {{ loc.description }}{% endif %}
+
+{% endfor %}

@@ -1,0 +1,5 @@
+Bạn giúp một trò chơi nhập vai tiếng Việt quyết định cách các nhân vật xưng hô và nhìn nhận nhau. Với mỗi cặp, đề xuất {{ options }} phương án khác nhau, hợp lý với dữ liệu đã cho.
+Chỉ trả về một đối tượng JSON, không kèm chữ nào khác, theo dạng:
+{"pairs": {"<mã cặp>": [{"addressing": "...", "nickname": "...", "relationship": "...", "stance": "...", "closeness": 0, "history": "..."}]}}
+Quy ước: "addressing" là cách xưng hô cụ thể (ví dụ "anh - em"); "nickname" là biệt danh gọi nhau, để trống nếu không có; "relationship" là quan hệ; "stance" là thái độ ban đầu; "closeness" là số nguyên từ 0 (xa lạ) tới 4 (rất thân); "history" là một câu về quá khứ chung, chỉ điền khi lời mở đầu ngụ ý họ đã quen nhau, còn không để trống.
+Không đụng tới các trường đã được ghim. Không bịa chuyện tình cảm hoặc tình dục cho bất kỳ ai.
