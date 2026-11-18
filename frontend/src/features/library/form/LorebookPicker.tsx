@@ -1,6 +1,8 @@
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
+import { ImportButton } from "@/features/io";
 import { t } from "@/i18n";
+import type { ImportResult } from "@/types/library";
 import { useLorebooks } from "../hooks";
 import { useFormState } from "./FormContext";
 
@@ -22,6 +24,19 @@ export function LorebookPicker({ selected, onChange }: LorebookPickerProps) {
     onChange(checked ? [...selected, id] : selected.filter((item) => item !== id));
   }
 
+  // A SillyTavern World Info file imported from here is linked right away (saved with the form).
+  function onImported(result: ImportResult): void {
+    const id = result.lorebook?.id;
+    if (id && !selected.includes(id)) onChange([...selected, id]);
+  }
+
+  const importRow = readOnly ? null : (
+    <div className="flex flex-wrap items-center gap-2 pt-1">
+      <ImportButton onImported={onImported} />
+      <p className="text-xs text-muted">{t("library.lorebooks.importHint")}</p>
+    </div>
+  );
+
   if (query.isPending)
     return <p className="text-sm text-muted">{t("library.lorebooks.loading")}</p>;
   if (query.isError) {
@@ -32,7 +47,12 @@ export function LorebookPicker({ selected, onChange }: LorebookPickerProps) {
     );
   }
   if (books.length === 0 && unknown.length === 0) {
-    return <p className="text-sm text-muted">{t("library.lorebooks.none")}</p>;
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm text-muted">{t("library.lorebooks.none")}</p>
+        {importRow}
+      </div>
+    );
   }
 
   return (
@@ -77,6 +97,7 @@ export function LorebookPicker({ selected, onChange }: LorebookPickerProps) {
           {t("library.list.loadMore")}
         </Button>
       ) : null}
+      {importRow}
     </div>
   );
 }

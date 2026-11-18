@@ -287,7 +287,9 @@ export const vi = {
       listLabel: "Danh sách lorebook",
       loading: "Đang tải lorebook…",
       loadFailed: "Không tải được danh sách lorebook.",
-      none: "Bạn chưa có lorebook nào. Tạo lorebook ở Thư viện.",
+      none: "Bạn chưa có lorebook nào. Tạo lorebook ở Thư viện, hoặc nhập file World Info.",
+      importHint:
+        "Nhập World Info của SillyTavern (.json): lorebook được thêm vào thư viện và tự tick ở đây. Nhớ bấm Lưu.",
       entryCount: "{count} mục",
       unknown: "Lorebook {id}… (không thấy trong thư viện của bạn)",
     },
