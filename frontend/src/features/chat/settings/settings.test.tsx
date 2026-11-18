@@ -13,6 +13,7 @@ vi.mock("@/features/chat/hooks", () => ({
   useChat: () => ({
     data: {
       settings: { director: { enabled: true, stream_mode: "draft_then_replace" }, nsfw: false },
+      default_lorebook_ids: ["lb-card"],
     },
   }),
   useUpdateChat: () => ({ mutate: mocks.update, isError: false }),
@@ -20,6 +21,20 @@ vi.mock("@/features/chat/hooks", () => ({
     isError: false,
     data: [{ id: "m/one", name: "Model One", context_length: 1000 }],
   }),
+}));
+
+vi.mock("@/features/library/form/LorebookPicker", () => ({
+  LorebookPicker: ({
+    selected,
+    onChange,
+  }: {
+    selected: string[];
+    onChange: (ids: string[]) => void;
+  }) => (
+    <button type="button" onClick={() => onChange([...selected, "lb-new"])}>
+      picker:{selected.join(",")}
+    </button>
+  ),
 }));
 
 function wrap(node: React.ReactNode) {
@@ -50,6 +65,17 @@ describe("ChatSettingsPanel", () => {
       target: { value: "m/one" },
     });
     expect(mocks.update.mock.calls[0]?.[0].settings.models).toEqual({ writer: "m/one" });
+  });
+});
+
+describe("ChatSettingsPanel lorebooks", () => {
+  it("starts from the card's lorebooks and saves a chat-only list", () => {
+    wrap(<ChatSettingsPanel chatId="c1" />);
+    expect(screen.getByText(t("chatSettings.lorebook.booksDefault"))).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "picker:lb-card" }));
+    expect(mocks.update.mock.calls[0]?.[0].settings.lorebook).toEqual({
+      book_ids: ["lb-card", "lb-new"],
+    });
   });
 });
 

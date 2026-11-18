@@ -838,7 +838,15 @@ export const vi = {
         "Model nghĩ trước khi viết: chậm hơn vài giây, tốn thêm token, nhưng lượt viết có chiều sâu hơn.",
     },
     reasoningEffort: { off: "Tắt", auto: "Tự động", low: "Thấp", medium: "Vừa", high: "Cao" },
-    lorebook: { title: "Lorebook", mode: "Chế độ tra lorebook" },
+    lorebook: {
+      title: "Lorebook",
+      mode: "Chế độ tra lorebook",
+      books: "Lorebook của chat này",
+      booksDefault:
+        "Đang theo lorebook gắn với card/Thực tại lúc tạo chat. Tick thêm hoặc bỏ để chỉnh riêng cho chat này; card gốc không đổi.",
+      booksCustom: "Chat này đang dùng danh sách lorebook riêng. Áp dụng từ lượt kế tiếp.",
+      booksReset: "Về lại lorebook của card",
+    },
     lorebookMode: { hybrid: "Hybrid", keyword: "Từ khoá", ai: "AI" },
     nsfw: {
       label: "Cho phép NSFW",

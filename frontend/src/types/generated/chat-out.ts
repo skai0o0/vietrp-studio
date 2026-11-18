@@ -10,6 +10,7 @@ export type Cast = CastMemberSummary[];
 export type CharacterId1 = string;
 export type CharacterName = string;
 export type CreatedAt = string;
+export type DefaultLorebookIds = string[];
 export type ForkedAtSeq = number | null;
 export type Id1 = string;
 export type MessagesCount = number;
@@ -21,6 +22,7 @@ export type Enabled = boolean;
 export type StreamMode = "draft_then_replace" | "hold_until_approved";
 export type ChainMax = number;
 export type WriteMode = "per_character" | "single_call";
+export type BookIds = string[] | null;
 export type Mode1 = "hybrid" | "keyword" | "ai";
 export type ContextLength = number | null;
 export type SummarizeAt = number;
@@ -46,6 +48,7 @@ export interface ChatOut {
   character_id?: CharacterId1;
   character_name?: CharacterName;
   created_at: CreatedAt;
+  default_lorebook_ids?: DefaultLorebookIds;
   forked_at_seq?: ForkedAtSeq;
   id: Id1;
   messages_count: MessagesCount;
@@ -94,6 +97,7 @@ export interface GroupSettings {
   write_mode?: WriteMode;
 }
 export interface LorebookSettings {
+  book_ids?: BookIds;
   mode?: Mode1;
 }
 export interface MemorySettings {

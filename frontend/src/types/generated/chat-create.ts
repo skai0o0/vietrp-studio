@@ -10,6 +10,7 @@ export type Enabled = boolean;
 export type StreamMode = "draft_then_replace" | "hold_until_approved";
 export type ChainMax = number;
 export type WriteMode = "per_character" | "single_call";
+export type BookIds = string[] | null;
 export type Mode1 = "hybrid" | "keyword" | "ai";
 export type ContextLength = number | null;
 export type SummarizeAt = number;
@@ -62,6 +63,7 @@ export interface GroupSettings {
   write_mode?: WriteMode;
 }
 export interface LorebookSettings {
+  book_ids?: BookIds;
   mode?: Mode1;
 }
 export interface MemorySettings {

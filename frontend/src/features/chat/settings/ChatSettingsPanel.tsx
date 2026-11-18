@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { LorebookPicker } from "@/features/library/form/LorebookPicker";
 import { t } from "@/i18n";
 import type { ChatSettings, StatePatch } from "@/types/chat";
 import { chatApi } from "../api";
@@ -215,6 +216,9 @@ export function ChatSettingsPanel({ chatId }: { chatId: string }) {
   }
 
   const directorEnabled = settings.director?.enabled ?? true;
+  // `book_ids` null = the books linked to the card/world when the chat was created.
+  const customBooks = Array.isArray(settings.lorebook?.book_ids);
+  const chatBooks = settings.lorebook?.book_ids ?? chat.data.default_lorebook_ids ?? [];
   return (
     <div className="flex flex-col gap-5 p-4">
       <h2 className="text-lg font-semibold">{t("chatSettings.title")}</h2>
@@ -363,9 +367,34 @@ export function ChatSettingsPanel({ chatId }: { chatId: string }) {
             label: t(`chatSettings.lorebookMode.${mode}`),
           }))}
           onChange={(value) =>
-            patch({ lorebook: { mode: value as (typeof LOREBOOK_MODES)[number] } })
+            patch({
+              lorebook: { ...settings.lorebook, mode: value as (typeof LOREBOOK_MODES)[number] },
+            })
           }
         />
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium">{t("chatSettings.lorebook.books")}</p>
+          <p className="text-xs text-muted">
+            {customBooks
+              ? t("chatSettings.lorebook.booksCustom")
+              : t("chatSettings.lorebook.booksDefault")}
+          </p>
+        </div>
+        <LorebookPicker
+          selected={chatBooks}
+          onChange={(book_ids) => patch({ lorebook: { ...settings.lorebook, book_ids } })}
+        />
+        {customBooks ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => patch({ lorebook: { ...settings.lorebook, book_ids: null } })}
+          >
+            {t("chatSettings.lorebook.booksReset")}
+          </Button>
+        ) : null}
       </section>
 
       <section className="flex flex-col gap-2">

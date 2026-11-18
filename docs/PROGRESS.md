@@ -165,5 +165,10 @@ Plan: `docs/P6-work-packages.md`.
 - Gates: BE 565, FE 173. Live check on a throwaway vault: reasoning starts ~1 s after `speaker_start`, reply follows ~2.5 s later. Not visually checked in the browser.
 - Follow-up: with reasoning on, Director retries make a turn ~20-25 s; consider `hold_until_approved` or fewer retries.
 
+### Lorebooks per chat (2026-11-19, lead)
+- Card/world lorebook picker has an "Nhập file" button: imported ST World Info is ticked right away.
+- `settings.lorebook.book_ids` (null = card/world links from `pack`, exposed as `ChatOut.default_lorebook_ids`); edited in chat settings with the same picker; "Về lại lorebook của card" resets to null. Books are still loaded through `load_books` (own or public only).
+- Gates: BE 569, FE 176. Not visually checked in the browser.
+
 ### Later phases
 P6 creator · P7 deploy. See KIEN-TRUC §13.

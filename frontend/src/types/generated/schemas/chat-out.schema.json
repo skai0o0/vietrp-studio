@@ -235,6 +235,22 @@
     "LorebookSettings": {
       "additionalProperties": false,
       "properties": {
+        "book_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Book Ids"
+        },
         "mode": {
           "default": "hybrid",
           "enum": [
@@ -330,6 +346,13 @@
       "format": "date-time",
       "title": "Created At",
       "type": "string"
+    },
+    "default_lorebook_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Default Lorebook Ids",
+      "type": "array"
     },
     "forked_at_seq": {
       "anyOf": [

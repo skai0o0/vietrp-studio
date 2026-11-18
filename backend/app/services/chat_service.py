@@ -224,8 +224,44 @@ def to_summary(record: ChatRecord) -> ChatSummary:
     )
 
 
+def _ids_of(data: Any) -> list[str]:
+    raw = data.get("lorebook_ids") if isinstance(data, dict) else None
+    return [str(i) for i in raw] if isinstance(raw, list) else []
+
+
+def pack_lorebook_ids(record: ChatRecord) -> list[str]:
+    """Lorebooks linked to the card/world snapshot taken when the chat was created (cast order, no duplicates)."""
+    if record.mode == "world":
+        ids = _ids_of(record.pack.get("world"))
+        for member in record.pack.get("cast", []):
+            if isinstance(member, dict):
+                ids += _ids_of(member.get("card"))
+    else:
+        ids = _ids_of(record.pack.get("card"))
+    return list(dict.fromkeys(ids))
+
+
+def chat_lorebook_ids(record: ChatRecord) -> list[uuid.UUID]:
+    """The books a turn may use: the chat's own list when set, else the snapshot's links."""
+    own = _settings_of(record).lorebook.book_ids
+    if own is not None:
+        return list(dict.fromkeys(own))
+    out: list[uuid.UUID] = []
+    for raw in pack_lorebook_ids(record):
+        try:
+            out.append(uuid.UUID(raw))
+        except ValueError:
+            continue
+    return out
+
+
 def to_chat_out(record: ChatRecord) -> ChatOut:
-    return ChatOut(**to_summary(record).model_dump(), state=record.state, settings=_settings_of(record))
+    return ChatOut(
+        **to_summary(record).model_dump(),
+        state=record.state,
+        settings=_settings_of(record),
+        default_lorebook_ids=pack_lorebook_ids(record),
+    )
 
 
 def to_message_out(record: MessageRecord, *, include_drafts: bool) -> MessageOut:
@@ -291,8 +327,7 @@ async def load_context(
         cast = [
             WorldCastEntry(id=c["id"], card=VietrpCard.model_validate(c["card"])) for c in chat.pack.get("cast", [])
         ]
-        lorebook_ids = [*world.lorebook_ids, *(lid for entry in cast for lid in entry.card.lorebook_ids)]
-        books = await load_books(r.library.lorebooks, vault_id, lorebook_ids)
+        books = await load_books(r.library.lorebooks, vault_id, chat_lorebook_ids(chat))
         return WorldChatContext(
             vault_id=vault_id,
             chat_id=chat_id,
@@ -307,7 +342,7 @@ async def load_context(
             preset=preset,
         )
     card = VietrpCard.model_validate(chat.pack["card"])
-    books = await load_books(r.library.lorebooks, vault_id, card.lorebook_ids)
+    books = await load_books(r.library.lorebooks, vault_id, chat_lorebook_ids(chat))
     return ChatContext(
         vault_id=vault_id,
         chat_id=chat_id,

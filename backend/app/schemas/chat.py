@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import uuid
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -29,6 +30,9 @@ class LorebookSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     mode: LorebookMode = "hybrid"
+    # The chat's own lorebook list. None = the books linked to the card/world when the chat was created
+    # (`ChatOut.default_lorebook_ids`); a list (even empty) replaces them for this chat only.
+    book_ids: list[uuid.UUID] | None = None
 
 
 class MemorySettings(BaseModel):
@@ -144,6 +148,8 @@ class ChatSummary(BaseModel):
 class ChatOut(ChatSummary):
     state: dict[str, Any]
     settings: ChatSettings
+    # Lorebooks linked to the card/world snapshot of this chat; used while `settings.lorebook.book_ids` is None.
+    default_lorebook_ids: list[str] = Field(default_factory=list)
 
 
 class MessageVariantOut(BaseModel):

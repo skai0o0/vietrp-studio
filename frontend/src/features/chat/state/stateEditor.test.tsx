@@ -50,6 +50,12 @@ vi.mock("../hooks", () => ({
 
 vi.mock("@/features/library/hooks", () => ({
   useWorld: () => ({ data: mocks.world }),
+  useLorebooks: () => ({
+    isPending: false,
+    isError: false,
+    hasNextPage: false,
+    data: { pages: [{ items: [], next_cursor: null }] },
+  }),
 }));
 
 function makeWorldChat(stateOverrides: Partial<WorldState> = {}): ChatOut {

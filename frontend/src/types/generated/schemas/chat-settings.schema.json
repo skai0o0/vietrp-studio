@@ -163,6 +163,22 @@
     "LorebookSettings": {
       "additionalProperties": false,
       "properties": {
+        "book_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Book Ids"
+        },
         "mode": {
           "default": "hybrid",
           "enum": [
