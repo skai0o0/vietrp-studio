@@ -1,4 +1,14 @@
-import { ChevronLeft, ChevronRight, GitFork, Info, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  GitFork,
+  Info,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import type { MessageOut } from "@/types/chat";
@@ -65,8 +76,7 @@ function ActionIconButton({
     <Button
       type="button"
       variant="ghost"
-      size="icon"
-      className="size-8"
+      size="icon-sm"
       disabled={disabled}
       aria-label={label}
       title={title}
@@ -94,11 +104,18 @@ export function MessageBubble({
   const [editing, setEditing] = useState(false);
   const [draftContent, setDraftContent] = useState("");
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (editing) editTextareaRef.current?.focus();
   }, [editing]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(id);
+  }, [copied]);
 
   const total = message.variants.length;
   const fallback = Math.max(
@@ -150,10 +167,19 @@ export function MessageBubble({
     resolveActionResult(onDelete?.(message.id), () => setConfirmDeleteOpen(false));
   }
 
+  const hasMeta = Boolean(variant?.director || variant?.draft);
+
+  function copyContent() {
+    const text = variant?.content ?? "";
+    if (!text) return;
+    void navigator.clipboard?.writeText(text);
+    setCopied(true);
+  }
+
   const bubble = cn(
-    "rounded-lg border px-3 py-2 text-fg",
-    isUser ? "border-accent/60 bg-surface-2" : "border-border bg-surface",
-    isNarrator && "border-dashed bg-surface/40 text-center italic",
+    "rounded-lg border px-3.5 py-2.5 text-fg [html[data-theme='e-ink']_&]:border-2",
+    isUser ? "border-accent/60 bg-surface-2" : "border-border-subtle bg-surface",
+    isNarrator && "border-border border-dashed bg-surface/40 text-center italic",
     isUser && !isFirstInGroup && "rounded-tr-sm",
     !isUser && !isNarrator && !isFirstInGroup && "rounded-tl-sm",
   );
@@ -171,13 +197,13 @@ export function MessageBubble({
         className={cn(
           "max-w-[92%] md:max-w-[75%]",
           editing && "w-full",
-          variant?.stopped && "opacity-80",
+          variant?.stopped && "opacity-85",
         )}
       >
         <div className={bubble}>
           {editing ? (
             <div className="flex flex-col gap-2 text-left not-italic">
-              <textarea
+              <Textarea
                 ref={editTextareaRef}
                 value={draftContent}
                 rows={3}
@@ -187,22 +213,28 @@ export function MessageBubble({
                   if (e.key === "Escape") {
                     e.preventDefault();
                     cancelEdit();
+                  } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    saveEdit();
                   }
                 }}
-                className="w-full resize-y rounded-md border border-border bg-surface-2 px-2.5 py-2 font-content text-base text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                className="resize-y font-content text-base md:text-base"
               />
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={cancelEdit}>
-                  {t("chat.message.cancelEdit")}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={disabled || draftContent.trim() === ""}
-                  onClick={saveEdit}
-                >
-                  {t("chat.message.saveEdit")}
-                </Button>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-2xs text-muted">{t("chat.message.editHint")}</span>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={cancelEdit}>
+                    {t("chat.message.cancelEdit")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={disabled || draftContent.trim() === ""}
+                    onClick={saveEdit}
+                  >
+                    {t("chat.message.saveEdit")}
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -218,7 +250,8 @@ export function MessageBubble({
         {!editing && (
           <div
             className={cn(
-              "mt-1 flex flex-wrap items-center gap-0.5 text-muted",
+              "mt-1 flex flex-wrap items-center gap-1 text-muted transition-opacity duration-fast ease-ui",
+              isUser && "justify-end",
               !alwaysShowActions &&
                 "opacity-100 md:opacity-0 md:group-hover/msg:opacity-100 md:group-focus-within/msg:opacity-100",
             )}
@@ -244,6 +277,12 @@ export function MessageBubble({
                 </ActionIconButton>
               </span>
             )}
+            <ActionIconButton
+              label={copied ? t("chat.message.copied") : t("chat.message.copy")}
+              onClick={copyContent}
+            >
+              {copied ? <Check className="text-accent-text" aria-hidden="true" /> : <Copy aria-hidden="true" />}
+            </ActionIconButton>
             {!isUser && message.seq >= 0 && (
               <ActionIconButton
                 label={t("chat.message.regenerate")}
@@ -253,7 +292,7 @@ export function MessageBubble({
                 <RotateCcw aria-hidden="true" />
               </ActionIconButton>
             )}
-            {!isUser && (
+            {!isUser && hasMeta && (
               <ActionIconButton label={t("chat.message.meta")} onClick={() => setMetaOpen(true)}>
                 <Info aria-hidden="true" />
               </ActionIconButton>

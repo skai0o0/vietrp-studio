@@ -71,12 +71,16 @@ function SpeakerStreamRow({
         >
           <ReasoningBlock
             text={entry.reasoning}
+            attempt={entry.attempt}
             thinking={
               !entry.done && !entry.stopped && entry.buffer === "" && !entry.directorPending
             }
           />
           {!holding && entry.buffer !== "" ? (
-            <div data-draft={muted || undefined} className={cn(muted && "text-muted opacity-70")}>
+            <div
+              data-draft={muted || undefined}
+              className={cn(muted && "border-l-2 border-dashed border-accent/60 pl-2.5 text-fg/85")}
+            >
               <RpText text={entry.buffer} />
             </div>
           ) : null}
@@ -99,14 +103,37 @@ function SpeakerStreamRow({
 
 /** The in-flight reply. Multi-speaker aware; falls back cleanly to single-speaker buffer. */
 export function StreamingBubble({ turn, holdUntilApproved, cast }: StreamingBubbleProps) {
-  if (
-    turn.status !== "streaming" ||
-    (turn.speaker === null &&
-      turn.speakerOrder.length === 0 &&
-      turn.buffer === "" &&
-      !turn.directorPending)
-  ) {
+  if (turn.status !== "streaming") {
     return null;
+  }
+
+  if (
+    turn.speaker === null &&
+    turn.speakerOrder.length === 0 &&
+    turn.buffer === "" &&
+    !turn.directorPending
+  ) {
+    return (
+      <div
+        data-testid="streaming-bubble"
+        data-preparing="true"
+        aria-live="polite"
+        className="flex items-start gap-2"
+      >
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2 text-muted">
+          <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden="true" />
+        </div>
+        <div className="flex max-w-[75%] flex-col gap-2 rounded-lg border border-border-subtle bg-surface px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-24 rounded bg-surface-2 motion-safe:animate-pulse" />
+            <span className="h-2.5 w-16 rounded bg-surface-2 motion-safe:animate-pulse" />
+          </div>
+          <p role="status" className="text-xs text-muted">
+            {t("chat.stream.preparing")}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (turn.speakerOrder.length > 0) {
@@ -151,9 +178,12 @@ export function StreamingBubble({ turn, holdUntilApproved, cast }: StreamingBubb
         turn.speaker === NARRATOR_SPEAKER ? "items-center" : "items-start",
       )}
     >
-      <div className="max-w-[92%] rounded-lg border border-border bg-surface px-3 py-2 md:max-w-[75%]">
+      <div className="max-w-[92%] rounded-lg border border-border bg-surface px-3.5 py-2.5 md:max-w-[75%]">
         {!holding && turn.buffer !== "" && (
-          <div data-draft={muted || undefined} className={cn(muted && "text-muted opacity-70")}>
+          <div
+            data-draft={muted || undefined}
+            className={cn(muted && "border-l-2 border-dashed border-accent/60 pl-2.5 text-fg/85")}
+          >
             <RpText text={turn.buffer} />
           </div>
         )}

@@ -1,5 +1,5 @@
-import { FastForward, History, SendHorizontal, Square, TextCursorInput, Undo2 } from "lucide-react";
-import { useRef, useState, type KeyboardEvent } from "react";
+import { FastForward, SendHorizontal, Square, TextCursorInput, Undo2 } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -17,73 +17,6 @@ import {
 
 /** How many sent messages the Up arrow can recall. */
 const HISTORY_LIMIT = 30;
-const MENU_ITEM_CLS =
-  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus";
-const MENU_HEADER_CLS =
-  "border-b border-border bg-surface-2 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted";
-
-interface SlashMenuWithHistoryProps {
-  historyMatches: readonly string[];
-  commands: readonly SlashCommand[];
-  activeIndex: number;
-  onPickHistory: (entry: string) => void;
-  onPickCommand: (command: SlashCommand) => void;
-}
-
-function SlashMenuWithHistory({
-  historyMatches,
-  commands,
-  activeIndex,
-  onPickHistory,
-  onPickCommand,
-}: SlashMenuWithHistoryProps) {
-  return (
-    <ul
-      role="listbox"
-      id="chat-command-list"
-      aria-label={t("chat.input.commandsLabel")}
-      className="absolute inset-x-3 bottom-full z-10 mb-1 max-h-60 overflow-y-auto rounded-lg border border-border bg-surface md:inset-x-4"
-    >
-      <li role="presentation" className={MENU_HEADER_CLS}>
-        {t("chat.input.historySection")}
-      </li>
-      {historyMatches.map((entry, i) => (
-        <li key={`h:${entry}`} role="option" aria-selected={i === activeIndex}>
-          <button
-            type="button"
-            onClick={() => onPickHistory(entry)}
-            className={cn(MENU_ITEM_CLS, i === activeIndex && "bg-surface-2")}
-          >
-            <History className="size-3.5 shrink-0 text-muted" aria-hidden="true" />
-            <span className="min-w-0 flex-1 truncate font-mono text-fg">{entry}</span>
-          </button>
-        </li>
-      ))}
-      {commands.length > 0 && (
-        <>
-          <li role="presentation" className={cn(MENU_HEADER_CLS, "border-t")}>
-            {t("chat.input.commandsSection")}
-          </li>
-          {commands.map((command, i) => {
-            const idx = historyMatches.length + i;
-            return (
-              <li key={command.name} role="option" aria-selected={idx === activeIndex}>
-                <button
-                  type="button"
-                  onClick={() => onPickCommand(command)}
-                  className={cn(MENU_ITEM_CLS, "gap-3", idx === activeIndex && "bg-surface-2")}
-                >
-                  <span className="font-mono text-accent-2">/{command.name}</span>
-                  <span className="min-w-0 flex-1 truncate text-muted">{t(command.hintKey)}</span>
-                </button>
-              </li>
-            );
-          })}
-        </>
-      )}
-    </ul>
-  );
-}
 
 function InputIconBtn({
   label,
@@ -106,7 +39,7 @@ function InputIconBtn({
     <Button
       type="button"
       variant={variant}
-      size="icon"
+      size="icon-sm"
       aria-pressed={pressed}
       aria-label={label}
       title={label}
@@ -120,6 +53,7 @@ function InputIconBtn({
 }
 
 interface ChatInputProps {
+  mode?: "single" | "world";
   isStreaming: boolean;
   usedTokens: number | null;
   budget: number | null;
@@ -136,6 +70,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({
+  mode,
   isStreaming,
   usedTokens,
   budget,
@@ -160,8 +95,17 @@ export function ChatInput({
   const historyPos = useRef<number | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    if (el.scrollHeight > 0) {
+      el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+    }
+  }, [text]);
+
   const query = commandQuery(text);
-  const commands = query === null ? [] : filterCommands(query);
+  const commands = query === null ? [] : filterCommands(query, mode);
   const historyMatches = query === null ? [] : filterCommandHistory(cmdHistory, query);
   const totalItems = historyMatches.length + commands.length;
   const popupOpen = !popupDismissed && query !== null && totalItems > 0;
@@ -291,20 +235,17 @@ export function ChatInput({
   const showUndo = !isStreaming && canUndo && Boolean(onUndo);
 
   return (
-    <div className="relative border-t border-border bg-bg px-3 pb-safe pt-2 md:px-4">
-      {popupOpen && historyMatches.length === 0 && (
-        <CommandPopup commands={commands} activeIndex={safeActive} onPick={pick} />
-      )}
-      {popupOpen && historyMatches.length > 0 && (
-        <SlashMenuWithHistory
-          historyMatches={historyMatches}
+    <div className="relative border-t border-border-subtle bg-bg px-3 pb-safe pt-2 md:px-4">
+      {popupOpen ? (
+        <CommandPopup
           commands={commands}
+          historyMatches={historyMatches}
           activeIndex={safeActive}
+          onPick={pick}
           onPickHistory={pickHistory}
-          onPickCommand={pick}
         />
-      )}
-      <div className="mb-2 overflow-hidden rounded-lg border border-border bg-surface focus-within:border-focus">
+      ) : null}
+      <div className="mb-2 overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-fast ease-ui focus-within:border-focus focus-within:outline focus-within:outline-1 focus-within:outline-focus">
         <TokenBar used={usedTokens} budget={budget} onOpen={onOpenInspector} />
         {prefillOpen && (
           <input
@@ -312,23 +253,10 @@ export function ChatInput({
             onChange={(e) => setPrefill(e.target.value)}
             aria-label={t("chat.input.prefillLabel")}
             placeholder={t("chat.input.prefillPlaceholder")}
-            className="block w-full border-b border-border bg-surface-2 px-3 py-2 font-content text-sm text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
+            className="block w-full border-b border-border-subtle bg-field px-3 py-2 font-content text-sm text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
           />
         )}
-        <div className="flex items-end gap-1 p-1">
-          <InputIconBtn
-            label={t("chat.input.prefillToggle")}
-            pressed={prefillOpen}
-            className={cn(prefillOpen && "text-accent-2")}
-            onClick={() => setPrefillOpen((v) => !v)}
-          >
-            <TextCursorInput aria-hidden="true" />
-          </InputIconBtn>
-          {showUndo && onUndo && (
-            <InputIconBtn label={t("chat.input.undo")} disabled={isActionPending} onClick={onUndo}>
-              <Undo2 aria-hidden="true" />
-            </InputIconBtn>
-          )}
+        <div className="px-2.5 pt-2">
           <textarea
             ref={textareaRef}
             value={text}
@@ -338,38 +266,52 @@ export function ChatInput({
             aria-label={t("chat.input.label")}
             aria-controls={popupOpen ? "chat-command-list" : undefined}
             placeholder={narrow ? t("chat.input.placeholderShort") : t("chat.input.placeholder")}
-            className="max-h-40 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 font-content text-base text-fg placeholder:text-muted focus-visible:outline-none"
+            className="max-h-40 min-h-10 w-full resize-none bg-transparent font-content text-base text-fg placeholder:text-muted focus-visible:outline-none"
           />
-          {showContinue && (
-            <InputIconBtn
-              label={t("chat.input.continue")}
-              variant="outline"
-              disabled={isActionPending}
-              onClick={handleContinue}
-            >
-              <FastForward aria-hidden="true" />
-            </InputIconBtn>
-          )}
-          {isStreaming ? (
-            <InputIconBtn label={t("chat.input.stop")} variant="danger" onClick={onStop}>
-              <Square aria-hidden="true" />
-            </InputIconBtn>
-          ) : (
-            <InputIconBtn
-              label={t("chat.input.send")}
-              variant="default"
-              disabled={text.trim() === "" || isActionPending}
-              onClick={submit}
-            >
-              <SendHorizontal aria-hidden="true" />
-            </InputIconBtn>
-          )}
         </div>
-        <p className="px-3 pb-1 text-right text-[11px] text-muted">
-          {usedTokens !== null && budget !== null
-            ? t("chat.input.tokens", { used: usedTokens, budget })
-            : t("chat.input.tokensUnknown")}
-        </p>
+        <div className="flex items-center justify-between gap-2 px-2 pb-1.5 pt-0.5">
+          <div className="flex items-center gap-1">
+            <InputIconBtn
+              label={t("chat.input.prefillToggle")}
+              pressed={prefillOpen}
+              className={cn(prefillOpen && "text-accent-2")}
+              onClick={() => setPrefillOpen((v) => !v)}
+            >
+              <TextCursorInput aria-hidden="true" />
+            </InputIconBtn>
+            {showUndo && onUndo && (
+              <InputIconBtn label={t("chat.input.undo")} disabled={isActionPending} onClick={onUndo}>
+                <Undo2 aria-hidden="true" />
+              </InputIconBtn>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5">
+            {showContinue && (
+              <InputIconBtn
+                label={t("chat.input.continue")}
+                variant="outline"
+                disabled={isActionPending}
+                onClick={handleContinue}
+              >
+                <FastForward aria-hidden="true" />
+              </InputIconBtn>
+            )}
+            {isStreaming ? (
+              <InputIconBtn label={t("chat.input.stop")} variant="danger" onClick={onStop}>
+                <Square aria-hidden="true" />
+              </InputIconBtn>
+            ) : (
+              <InputIconBtn
+                label={t("chat.input.send")}
+                variant="default"
+                disabled={text.trim() === "" || isActionPending}
+                onClick={submit}
+              >
+                <SendHorizontal aria-hidden="true" />
+              </InputIconBtn>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

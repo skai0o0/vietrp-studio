@@ -168,8 +168,21 @@ async def test_utility_routes(env: ChatEnv) -> None:
     chat = await make_chat(env.a, await make_character(env.a))
     assert (await env.a.get(f"/api/usage?chat_id={chat['id']}")).json() == []
     persona_id = await make_persona(env.a)
-    assert (await env.a.patch(f"/api/chats/{chat['id']}", json={"persona_id": persona_id})).json()[
-        "persona_id"
-    ] == persona_id
+    state_res = await env.a.patch(
+        f"/api/chats/{chat['id']}/state",
+        json={"bonds": {"char:user": {"pair_id": "char:user", "label": "Linh ↔ người chơi"}}},
+    )
+    assert state_res.status_code == 200
+    attached = await env.a.patch(f"/api/chats/{chat['id']}", json={"persona_id": persona_id})
+    assert attached.status_code == 200
+    attached_json = attached.json()
+    assert attached_json["persona_id"] == persona_id
+    assert attached_json["state"]["bonds"]["char:user"]["label"].startswith("Linh ↔ ")
+    assert attached_json["state"]["bonds"]["char:user"]["label"] != "Linh ↔ người chơi"
+    cleared = await env.a.patch(f"/api/chats/{chat['id']}", json={"persona_id": None})
+    assert cleared.status_code == 200
+    cleared_json = cleared.json()
+    assert cleared_json["persona_id"] is None
+    assert cleared_json["state"]["bonds"]["char:user"]["label"] == "Linh ↔ người chơi"
     assert (await env.a.patch(f"/api/chats/{chat['id']}", json={"persona_id": persona_id})).status_code == 200
     assert (await env.b.patch(f"/api/chats/{chat['id']}", json={"persona_id": persona_id})).status_code == 404

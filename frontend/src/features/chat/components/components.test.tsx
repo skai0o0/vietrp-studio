@@ -8,6 +8,7 @@ import { t } from "@/i18n";
 import type { CastMemberSummary, ChatSummary, MessageOut } from "@/types/chat";
 import { RecentChats } from "../newChat/RecentChats";
 import { initialTurnState, type TurnState } from "../store";
+import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { ChatView } from "./ChatView";
 import { MessageBubble } from "./MessageBubble";
@@ -369,7 +370,8 @@ describe("ChatView", () => {
       notices: [{ code: "director_failed" } as never],
     });
     render(wrap(<ChatView chatId="c1" />));
-    expect(screen.getAllByText("Linh")).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Linh" })).toBeInTheDocument();
+    expect(screen.getAllByText("Linh")).toHaveLength(2);
     expect(screen.getByText("Đang viết")).toBeInTheDocument();
     expect(screen.getByText(/Director lỗi/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Mở Prompt Inspector/ }));
@@ -737,5 +739,83 @@ describe("ChatView fork navigation and RecentChats tree", () => {
     await userEvent.type(searchInput, "Hà Nội");
     expect(screen.getByText("Đêm Hà Nội")).toBeInTheDocument();
     expect(screen.queryByText("Chuyến đi Đà Lạt")).toBeNull();
+  });
+
+  it("filters world-only slash commands in single chat mode", async () => {
+    render(
+      <ChatInput
+        mode="single"
+        isStreaming={false}
+        usedTokens={100}
+        budget={1000}
+        onSend={vi.fn()}
+        onStop={vi.fn()}
+        onOpenInspector={vi.fn()}
+        onTextChange={vi.fn()}
+      />,
+    );
+    await userEvent.type(screen.getByRole("textbox", { name: t("chat.input.label") }), "/");
+    const list = screen.getByRole("listbox", { name: t("chat.input.commandsLabel") });
+    expect(within(list).getByText("/cmd")).toBeInTheDocument();
+    expect(within(list).getByText("/addnpc")).toBeInTheDocument();
+    expect(within(list).queryByText("/move")).toBeNull();
+    expect(within(list).queryByText("/time")).toBeNull();
+    expect(within(list).queryByText("/force")).toBeNull();
+  });
+
+  it("renders pre-speaker skeleton while streaming before first speaker starts", () => {
+    render(
+      <StreamingBubble
+        holdUntilApproved={false}
+        turn={turn({ status: "streaming" })}
+      />,
+    );
+    const bubble = screen.getByTestId("streaming-bubble");
+    expect(bubble).toHaveAttribute("data-preparing", "true");
+    expect(screen.getByRole("status")).toHaveTextContent(t("chat.stream.preparing"));
+  });
+
+  it("re-opens dismissed NoticeList error when errorNonce increments", async () => {
+    const { rerender } = render(
+      <NoticeList notices={[]} errorCode="llm_failed" errorNonce={1} />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(t("chat.errors.llm_failed"));
+    await userEvent.click(screen.getByRole("button", { name: t("chat.stream.dismiss") }));
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    rerender(<NoticeList notices={[]} errorCode="llm_failed" errorNonce={2} />);
+    expect(screen.getByRole("alert")).toHaveTextContent(t("chat.errors.llm_failed"));
+  });
+
+  it("renders ChatHeader with title, persona pill, world scene summary, and inspector trigger", async () => {
+    const onOpenInspector = vi.fn();
+    render(
+      wrap(
+        <ChatHeader
+          chat={{
+            id: "cw1",
+            mode: "world",
+            title: "Phố Mưa",
+            world_name: "Hà Nội",
+            persona_id: "p1",
+            cast: [],
+            messages_count: 2,
+            settings: {},
+            state: { location_id: "quan_ca_phe", time: "20:00", tension: 2 },
+            created_at: "t",
+            updated_at: "t",
+          }}
+          personaName="Minh"
+          onOpenInspector={onOpenInspector}
+        />,
+      ),
+    );
+    expect(screen.getByRole("heading", { name: "Phố Mưa" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: t("chat.header.personaLabel", { name: "Minh" }) })).toBeInTheDocument();
+    expect(screen.getByText(/quan_ca_phe · 20:00/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: t("chat.header.moreActions") }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: t("chat.header.openInspector") }));
+    expect(onOpenInspector).toHaveBeenCalledTimes(1);
   });
 });

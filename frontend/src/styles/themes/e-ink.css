@@ -3,20 +3,43 @@
   color-scheme: light;
   --bg: 250 249 245;
   --surface: 244 243 238;
-  --surface-2: 232 231 225;
+  --surface-2: 234 233 227;
+  --surface-3: 250 249 245;
+  --field-bg: 255 255 255;
+  --hover: 0 0 0;
+  --border-subtle: 190 189 183;
   --border: 0 0 0;
+  --border-strong: 0 0 0;
   --text: 0 0 0;
   --text-muted: 70 70 70;
   --accent: 0 0 0;
+  --accent-text: 0 0 0;
   --accent-2: 0 0 0;
   --accent-fg: 250 249 245;
   --danger: 0 0 0;
+  --danger-text: 0 0 0;
+  --danger-fg: 250 249 245;
+  --success: 0 0 0;
+  --warning: 0 0 0;
   --focus: 0 0 0;
+  --scrim: 0 0 0 / 0.48;
   --glow: none;
+  --shadow-sm: none;
+  --shadow-popover: none;
+  --shadow-dialog: none;
   --radius: 0.25rem;
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
   --font-content: "Noto Serif", Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --motion: 0;
+  --dur-press: 0ms;
+  --dur-fast: 0ms;
+  --dur-base: 0ms;
+  --dur-panel: 0ms;
+  --dur-exit: 0ms;
+  --ease-ui: linear;
+  --ease-enter: linear;
+  --ease-exit: linear;
 }
 
 [data-theme="e-ink"] *,
@@ -27,6 +50,28 @@
   background-image: none !important;
   animation: none !important;
   transition: none !important;
+}
+
+/* Non-color semantic parity for E-ink: destructive actions, active/selected states, card hover. */
+[data-theme="e-ink"] [data-variant="danger"] {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  border: 2px dashed rgb(var(--text));
+}
+[data-theme="e-ink"] [data-variant="danger"]:hover:not(:disabled) {
+  background: rgb(var(--hover) / 0.08);
+}
+
+[data-theme="e-ink"] [data-eink-active="true"],
+[data-theme="e-ink"] [role="tab"][data-state="active"],
+[data-theme="e-ink"] [data-highlighted] {
+  background: rgb(var(--accent));
+  color: rgb(var(--accent-fg));
+}
+
+[data-theme="e-ink"] .card-interactive:hover {
+  outline: 2px solid rgb(var(--text));
+  outline-offset: -2px;
 }
 
 /* Token bar steps without colour: thin solid -> dashed -> thick -> inverted (full). */

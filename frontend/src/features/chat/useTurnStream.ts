@@ -55,14 +55,21 @@ export function useTurnStream(chatId: string): UseTurnStream {
     void client.invalidateQueries({ queryKey: chatKeys.messages(chatId) });
     void client.invalidateQueries({ queryKey: chatKeys.detail(chatId) });
     void client.invalidateQueries({ queryKey: [...chatKeys.all, "list"] });
+    void client.invalidateQueries({ queryKey: chatKeys.promptPreview(chatId) });
+    void client.invalidateQueries({ queryKey: chatKeys.usage(chatId) });
   }, [client, chatId]);
 
   const runStream = useCallback(
-    async (url: string, body: unknown, refreshOnError: boolean): Promise<boolean> => {
+    async (
+      url: string,
+      body: unknown,
+      refreshOnError: boolean,
+      optimisticUserText: string | null = null,
+    ): Promise<boolean> => {
       if (controllerRef.current) return false;
       const controller = new AbortController();
       controllerRef.current = controller;
-      useChatStreamStore.getState().begin(chatId);
+      useChatStreamStore.getState().begin(chatId, optimisticUserText);
       let settled = false;
       let started = false;
       let failedEarly = false;
@@ -75,7 +82,11 @@ export function useTurnStream(chatId: string): UseTurnStream {
           if (!event) return;
           started = true;
           useChatStreamStore.getState().apply(chatId, event);
-          if (event.type === "state") {
+          if (event.type === "scene") {
+            if (event.merged) {
+              mergeCachedChatState(client, chatId, { scene: event.merged });
+            }
+          } else if (event.type === "state") {
             mergeCachedChatState(client, chatId, event.state as Record<string, unknown>);
           } else if (event.type === "bonds") {
             mergeCachedChatState(client, chatId, { bonds: event.bonds });
@@ -125,7 +136,12 @@ export function useTurnStream(chatId: string): UseTurnStream {
 
   const send = useCallback(
     ({ text, prefill }: SendOptions) =>
-      runStream(chatApi.turnUrl(chatId), { text, ...(prefill ? { prefill } : {}) }, false),
+      runStream(
+        chatApi.turnUrl(chatId),
+        { text, ...(prefill ? { prefill } : {}) },
+        false,
+        text.trim() || null,
+      ),
     [chatId, runStream],
   );
 

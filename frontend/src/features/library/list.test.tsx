@@ -120,4 +120,24 @@ describe("other lists", () => {
     expect(screen.queryByRole("heading", { name: "Hùng" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Linh" })).toBeInTheDocument();
   });
+
+  it("renders library section tabs linking to characters, worlds, lorebooks, and personas", async () => {
+    mockApi((call) => (call.path.startsWith("/api/characters") ? page([]) : undefined));
+    renderAt(<CharactersList />, "/library/characters", "/library/characters");
+
+    const nav = await screen.findByRole("navigation", { name: t("library.list.navLabel") });
+    expect(nav.querySelector('a[href="/library/characters"]')).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(nav.querySelector('a[href="/library/worlds"]')).toHaveTextContent(
+      t("pages.library.worlds.title"),
+    );
+    expect(nav.querySelector('a[href="/library/lorebooks"]')).toHaveTextContent(
+      t("pages.library.lorebooks.title"),
+    );
+    expect(nav.querySelector('a[href="/library/personas"]')).toHaveTextContent(
+      t("pages.library.personas.title"),
+    );
+  });
 });

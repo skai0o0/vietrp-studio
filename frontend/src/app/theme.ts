@@ -22,6 +22,9 @@ function readStoredTheme(): ThemeId {
 
 function applyTheme(theme: ThemeId): void {
   document.documentElement.setAttribute("data-theme", theme);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", theme === "e-ink" ? "#FAF9F5" : "#000000");
 }
 
 interface ThemeState {

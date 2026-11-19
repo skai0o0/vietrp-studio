@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { usePersonas } from "@/features/library/hooks";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -13,9 +14,14 @@ export function PersonaPicker({ value, onChange }: PersonaPickerProps) {
   const items = personas.data ?? [];
   return (
     <section aria-labelledby="newchat-persona" className="flex flex-col gap-2">
-      <h2 id="newchat-persona" className="text-sm font-semibold">
-        {t("newChat.step.persona")}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="newchat-persona" className="text-sm font-semibold">
+          {t("newChat.step.persona")}
+        </h2>
+        <Link to="/library/personas/new" className="text-xs font-medium text-accent underline">
+          {t("newChat.createPersona")}
+        </Link>
+      </div>
       <div role="radiogroup" aria-labelledby="newchat-persona" className="flex flex-wrap gap-2">
         <Choice selected={value === null} onSelect={() => onChange(null)}>
           {t("newChat.noPersona")}

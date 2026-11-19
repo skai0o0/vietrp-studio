@@ -18,7 +18,7 @@ const SheetOverlay = React.forwardRef<
   <SheetPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-bg/80 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+      "fixed inset-0 z-modal bg-scrim data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-exit data-[state=open]:duration-panel motion-reduce:animate-none",
       className,
     )}
     {...props}
@@ -27,7 +27,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = "SheetOverlay";
 
 const sheetVariants = cva(
-  "fixed z-50 flex flex-col gap-2 border-border bg-surface data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
+  "fixed z-modal flex flex-col border-border bg-surface shadow-dialog data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-[160ms] data-[state=open]:duration-[240ms] motion-reduce:animate-none",
   {
     variants: {
       side: {
@@ -45,32 +45,73 @@ const sheetVariants = cva(
 export interface SheetContentProps
   extends
     React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  closeLabel?: string;
+  hideDefaultClose?: boolean;
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", closeLabel, hideDefaultClose = false, className, children, ...props }, ref) => (
   <SheetPrimitive.Portal>
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
       {children}
-      <SheetPrimitive.Close
-        aria-label={t("layout.closeSidebar")}
-        className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-md text-muted hover:bg-surface-2 hover:text-fg"
-      >
-        <X className="size-4" aria-hidden="true" />
-      </SheetPrimitive.Close>
+      {!hideDefaultClose ? (
+        <SheetPrimitive.Close
+          aria-label={closeLabel ?? t("common.close")}
+          className={cn(
+            "absolute right-3 flex size-10 cursor-pointer items-center justify-center rounded-md text-muted transition-[color,background-color,transform] duration-fast ease-ui hover:bg-hover/10 hover:text-fg active:scale-[0.96] motion-reduce:active:scale-100 md:size-9",
+            side === "bottom" ? "top-3" : "top-[calc(0.75rem+env(safe-area-inset-top,0px))]",
+          )}
+        >
+          <X className="size-4" aria-hidden="true" />
+        </SheetPrimitive.Close>
+      ) : null}
     </SheetPrimitive.Content>
   </SheetPrimitive.Portal>
 ));
 SheetContent.displayName = "SheetContent";
+
+/** Sticky header bar placed in-flow so drawer close controls never cover sidebar headings. */
+function SheetHeader({
+  title,
+  closeLabel,
+  showHandle = false,
+  className,
+}: {
+  title: React.ReactNode;
+  closeLabel?: string;
+  showHandle?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={cn("shrink-0 border-b border-border-subtle bg-surface", className)}>
+      {showHandle ? (
+        <div className="flex justify-center pt-2" aria-hidden="true">
+          <span className="h-1 w-10 rounded-full bg-border-strong" />
+        </div>
+      ) : null}
+      <div className="flex items-center justify-between gap-2 px-4 py-2.5">
+        <span className="min-w-0 truncate text-sm font-semibold text-fg">{title}</span>
+        <SheetPrimitive.Close
+          aria-label={closeLabel ?? t("common.close")}
+          className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted transition-[color,background-color,transform] duration-fast ease-ui hover:bg-hover/10 hover:text-fg active:scale-[0.96] motion-reduce:active:scale-100 md:size-9"
+        >
+          <X className="size-4" aria-hidden="true" />
+        </SheetPrimitive.Close>
+      </div>
+    </div>
+  );
+}
 
 export {
   Sheet,
   SheetClose,
   SheetContent,
   SheetDescription,
+  SheetHeader,
   SheetOverlay,
   SheetTitle,
   SheetTrigger,

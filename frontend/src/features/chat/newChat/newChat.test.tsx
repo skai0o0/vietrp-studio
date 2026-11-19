@@ -48,6 +48,13 @@ describe("NewChatPage", () => {
     expect(screen.getByText(/Chào người chơi, tôi là/)).toBeTruthy();
   });
 
+  it("links directly to persona creation from PersonaPicker", () => {
+    renderPage(withGreetings(["Xin chào"]));
+    expect(
+      screen.getByRole("link", { name: t("newChat.createPersona") }).getAttribute("href"),
+    ).toBe("/library/personas/new");
+  });
+
   it("blocks cards that need an age and links to the editor", () => {
     renderPage(characterOut({ id: "c9", needs_age: true }));
     expect(screen.getByTestId("needs-age-block")).toBeTruthy();

@@ -45,6 +45,10 @@ export interface TurnState {
   notices: NoticeEvent[];
   usage: UsageEvent[];
   errorCode: string | null;
+  /** Optimistic user message rendered while waiting for server persistence. */
+  optimisticUserMessage: string | null;
+  /** Monotonic per-chat error counter so repeated identical errors still re-surface. */
+  errorNonce: number;
   /** Ordered `message_id`s seen during this turn. */
   speakerOrder: string[];
   speakerBuffers: Record<string, SpeakerTurnBuffer>;
@@ -70,6 +74,8 @@ export const initialTurnState: TurnState = {
   notices: [],
   usage: [],
   errorCode: null,
+  optimisticUserMessage: null,
+  errorNonce: 0,
   speakerOrder: [],
   speakerBuffers: {},
   liveScene: null,
@@ -243,49 +249,113 @@ export function reduceTurn(state: TurnState, event: TurnStreamEvent): TurnState 
     case "usage":
       return { ...state, usage: [...state.usage, event] };
     case "error":
-      return { ...state, status: "error", errorCode: event.code, directorPending: false };
+      return {
+        ...state,
+        status: "error",
+        errorCode: event.code,
+        directorPending: false,
+        errorNonce: state.errorNonce + 1,
+      };
     case "done":
       return {
         ...state,
         status: state.status === "error" ? "error" : "done",
         directorPending: false,
+        optimisticUserMessage: null,
       };
     default:
       return state;
   }
 }
 
+export type LiveStreamField = "liveState" | "liveScene" | "liveBonds" | "liveSummary";
+
 interface ChatStreamStore {
   turns: Record<string, TurnState>;
-  begin: (chatId: string) => void;
+  begin: (chatId: string, optimisticUserText?: string | null) => void;
   apply: (chatId: string, event: TurnStreamEvent) => void;
   fail: (chatId: string, code: string) => void;
   finish: (chatId: string) => void;
+  clearLiveFields: (chatId: string, fields: LiveStreamField[]) => void;
   clearMemory: (chatId: string) => void;
   clear: (chatId: string) => void;
 }
 
 export const useChatStreamStore = create<ChatStreamStore>((set) => ({
   turns: {},
-  begin: (chatId) =>
-    set((s) => ({ turns: { ...s.turns, [chatId]: { ...initialTurnState, status: "streaming" } } })),
+  begin: (chatId, optimisticUserText = null) =>
+    set((s) => ({
+      turns: {
+        ...s.turns,
+        [chatId]: {
+          ...initialTurnState,
+          status: "streaming",
+          errorNonce: s.turns[chatId]?.errorNonce ?? 0,
+          optimisticUserMessage: optimisticUserText ?? null,
+        },
+      },
+    })),
   apply: (chatId, event) =>
     set((s) => ({
       turns: { ...s.turns, [chatId]: reduceTurn(s.turns[chatId] ?? initialTurnState, event) },
     })),
   fail: (chatId, code) =>
-    set((s) => ({
-      turns: {
-        ...s.turns,
-        [chatId]: { ...(s.turns[chatId] ?? initialTurnState), status: "error", errorCode: code },
-      },
-    })),
+    set((s) => {
+      const prev = s.turns[chatId] ?? initialTurnState;
+      return {
+        turns: {
+          ...s.turns,
+          [chatId]: {
+            ...prev,
+            status: "error",
+            errorCode: code,
+            directorPending: false,
+            optimisticUserMessage: null,
+            errorNonce: prev.errorNonce + 1,
+          },
+        },
+      };
+    }),
   // Stream closed without `done`/`error` (abort): keep the buffer, stop streaming.
   finish: (chatId) =>
     set((s) => {
       const current = s.turns[chatId];
       if (!current || current.status !== "streaming") return s;
-      return { turns: { ...s.turns, [chatId]: { ...current, status: "done" } } };
+      return {
+        turns: {
+          ...s.turns,
+          [chatId]: { ...current, status: "done", optimisticUserMessage: null },
+        },
+      };
+    }),
+  clearLiveFields: (chatId, fields) =>
+    set((s) => {
+      const current = s.turns[chatId];
+      if (!current || fields.length === 0) return s;
+      const next = { ...current };
+      let changed = false;
+      for (const field of fields) {
+        if (field === "liveState" && (next.liveState !== null || next.stateChanged.length > 0)) {
+          next.liveState = null;
+          next.stateChanged = [];
+          next.stateConfidence = {};
+          changed = true;
+        } else if (field === "liveScene" && next.liveScene !== null) {
+          next.liveScene = null;
+          changed = true;
+        } else if (field === "liveBonds" && next.liveBonds !== null) {
+          next.liveBonds = null;
+          changed = true;
+        } else if (
+          field === "liveSummary" &&
+          (next.liveSummary !== null || next.archivistEventsAdded !== 0)
+        ) {
+          next.liveSummary = null;
+          next.archivistEventsAdded = 0;
+          changed = true;
+        }
+      }
+      return changed ? { turns: { ...s.turns, [chatId]: next } } : s;
     }),
   clearMemory: (chatId) =>
     set((s) => {

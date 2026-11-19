@@ -1,20 +1,43 @@
-/* OLED Neon: true black base, neon accents. Palette follows viet-rp-glow. */
+/* OLED Neon: true black base, elevated slate surfaces, WCAG-verified neon accents. */
 [data-theme="oled-neon"] {
   color-scheme: dark;
   --bg: 0 0 0;
-  --surface: 10 10 10;
-  --surface-2: 18 18 18;
-  --border: 30 30 30;
+  --surface: 12 12 15;
+  --surface-2: 22 22 27;
+  --surface-3: 32 32 40;
+  --field-bg: 6 6 9;
+  --hover: 255 255 255;
+  --border-subtle: 36 36 44;
+  --border: 86 86 98;
+  --border-strong: 128 128 144;
   --text: 245 245 247;
-  --text-muted: 150 150 160;
-  --accent: 176 38 255;
+  --text-muted: 160 160 172;
+  --accent: 158 34 235;
+  --accent-text: 204 128 255;
   --accent-2: 0 240 255;
   --accent-fg: 255 255 255;
-  --danger: 255 38 100;
+  --danger: 220 28 74;
+  --danger-text: 255 102 138;
+  --danger-fg: 255 255 255;
+  --success: 52 211 153;
+  --warning: 251 191 36;
   --focus: 0 240 255;
-  --glow: 0 0 10px rgb(176 38 255 / 0.4), 0 0 20px rgb(176 38 255 / 0.2);
+  --scrim: 0 0 0 / 0.78;
+  --glow: 0 0 10px rgb(158 34 235 / 0.4), 0 0 20px rgb(158 34 235 / 0.2);
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.45);
+  --shadow-popover: 0 10px 30px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(var(--border) / 0.6);
+  --shadow-dialog: 0 24px 64px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(var(--border) / 0.8);
   --radius: 0.75rem;
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
   --font-content: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --motion: 1;
+  --dur-press: 90ms;
+  --dur-fast: 120ms;
+  --dur-base: 150ms;
+  --dur-panel: 200ms;
+  --dur-exit: 120ms;
+  --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }

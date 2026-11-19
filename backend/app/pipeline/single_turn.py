@@ -49,7 +49,7 @@ from app.pipeline.prompt_assembler import (
     assemble,
 )
 from app.pipeline.state_commands import STATE_COMMAND_KINDS, execute_state_command, npcs_from_state
-from app.prompts.presets import PresetLayers
+from app.prompts.presets import PresetLayers, substitute_placeholders
 from app.repositories.messages_repo import MemorySnapshotRecord, MessageRecord, NewVariant, VariantRecord
 from app.schemas.chat import ChatSettings
 from app.schemas.events import (
@@ -424,8 +424,8 @@ async def _turn(deps: TurnDeps, inp: TurnInput, cancel: Any) -> AsyncIterator[Tu
         seq = await store.next_seq()
 
     has_prior_user_history = any(m.speaker == USER_SPEAKER for m in history_records)
-    user_text = parsed.message
     user_name = ctx.persona.name if ctx.persona is not None else FALLBACK_USER_NAME
+    user_text = substitute_placeholders(parsed.message, char=ctx.card.name, user=user_name)
     user_seq = seq
     if not inp.is_continue and regen_target is None and user_text.strip():
         user_id = uuid.uuid4()

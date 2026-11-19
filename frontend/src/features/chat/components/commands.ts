@@ -4,14 +4,15 @@ export interface SlashCommand {
   name: string;
   hintKey: MessageKey;
   supported: boolean;
+  worldOnly?: boolean;
 }
 
 /** All chat slash commands supported in P5. */
 export const SLASH_COMMANDS: readonly SlashCommand[] = [
   { name: "cmd", hintKey: "chat.commands.cmd", supported: true },
-  { name: "force", hintKey: "chat.commands.force", supported: true },
-  { name: "time", hintKey: "chat.commands.time", supported: true },
-  { name: "move", hintKey: "chat.commands.move", supported: true },
+  { name: "force", hintKey: "chat.commands.force", supported: true, worldOnly: true },
+  { name: "time", hintKey: "chat.commands.time", supported: true, worldOnly: true },
+  { name: "move", hintKey: "chat.commands.move", supported: true, worldOnly: true },
   { name: "addnpc", hintKey: "chat.commands.addnpc", supported: true },
   { name: "removenpc", hintKey: "chat.commands.removenpc", supported: true },
   { name: "listnpc", hintKey: "chat.commands.listnpc", supported: true },
@@ -57,8 +58,10 @@ export function commandQuery(text: string): string | null {
   return match ? (match[1] ?? "").toLowerCase() : null;
 }
 
-export function filterCommands(query: string): SlashCommand[] {
-  return SLASH_COMMANDS.filter((c) => c.name.startsWith(query));
+export function filterCommands(query: string, mode?: "single" | "world"): SlashCommand[] {
+  return SLASH_COMMANDS.filter(
+    (c) => c.name.startsWith(query) && !(mode === "single" && c.worldOnly),
+  );
 }
 
 export function filterCommandHistory(history: readonly string[], query: string): string[] {

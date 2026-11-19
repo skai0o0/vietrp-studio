@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, type RouteObject } from "react-router-dom";
+import { createBrowserRouter, Navigate, type RouteObject } from "react-router-dom";
 import { t } from "@/i18n";
 import { AppLayout } from "./AppLayout";
 
 const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
+const ChatsHubPage = lazy(() => import("@/pages/ChatsHubPage"));
 const ChatPage = lazy(() => import("@/pages/ChatPage"));
 const NewChatPage = lazy(() => import("@/features/chat/newChat/NewChatPage"));
 const CreatePage = lazy(() => import("@/pages/CreatePage"));
@@ -59,12 +60,32 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        path: "chats",
+        element: (
+          <Lazy>
+            <ChatsHubPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: "chats/new",
+        element: (
+          <Lazy>
+            <NewChatPage />
+          </Lazy>
+        ),
+      },
+      {
         path: "chat/:chatId",
         element: (
           <Lazy>
             <ChatPage />
           </Lazy>
         ),
+      },
+      {
+        path: "library",
+        element: <Navigate to="/library/characters" replace />,
       },
       {
         path: "library/characters",

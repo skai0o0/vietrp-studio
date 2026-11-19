@@ -10,6 +10,12 @@
 @import "@fontsource/noto-serif/vietnamese-400.css";
 @import "@fontsource/noto-serif/latin-400.css";
 @import "@fontsource/noto-serif/latin-ext-400.css";
+@import "@fontsource/noto-serif/vietnamese-400-italic.css";
+@import "@fontsource/noto-serif/latin-400-italic.css";
+@import "@fontsource/noto-serif/latin-ext-400-italic.css";
+@import "@fontsource/noto-serif/vietnamese-600.css";
+@import "@fontsource/noto-serif/latin-600.css";
+@import "@fontsource/noto-serif/latin-ext-600.css";
 @import "./themes/oled-neon.css";
 @import "./themes/e-ink.css";
 
@@ -35,13 +41,37 @@
     @apply border-border;
   }
 
+  button,
+  a,
+  [role="button"],
+  [role="tab"],
+  [role="switch"] {
+    touch-action: manipulation;
+  }
+
   :focus-visible {
     outline: 2px solid rgb(var(--focus));
     outline-offset: 2px;
   }
 
-  [data-theme="e-ink"] a:not([role="button"]) {
+  /* Scope E-ink link underlines to prose links rather than cards, tabs, and navigation items. */
+  [data-theme="e-ink"] .link-inline,
+  [data-theme="e-ink"] p a:not([role="button"]):not([data-no-underline]) {
     text-decoration: underline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: color, background-color, border-color, opacity !important;
   }
 }
 
@@ -54,5 +84,25 @@
   }
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
+  }
+  .focus-inset:focus-visible {
+    outline-offset: -2px;
+  }
+  .card-interactive {
+    transition:
+      transform var(--dur-base) var(--ease-ui),
+      border-color var(--dur-base) var(--ease-ui),
+      box-shadow var(--dur-base) var(--ease-ui);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-interactive:hover {
+      transform: none;
+    }
   }
 }

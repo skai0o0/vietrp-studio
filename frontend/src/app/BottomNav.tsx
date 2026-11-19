@@ -9,26 +9,27 @@ export function BottomNav() {
   return (
     <nav
       aria-label={t("nav.mobile")}
-      className="shrink-0 border-t border-border bg-surface pb-safe"
+      className="shrink-0 border-t border-border-subtle bg-surface pb-safe"
     >
-      <ul className="flex items-stretch justify-around">
+      <ul className="flex items-stretch justify-around px-1 py-1">
         {NAV_ITEMS.map((item) => {
           const active = isNavActive(item, pathname);
           const Icon = item.icon;
           return (
-            <li key={item.id} className="flex-1">
+            <li key={item.id} className="min-w-0 flex-1">
               <NavLink
                 to={item.to}
                 aria-current={active ? "page" : undefined}
+                data-eink-active={active || undefined}
                 className={cn(
-                  "flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] transition-colors",
-                  active ? "text-accent" : "text-muted hover:text-fg",
+                  "flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-md px-1 text-xs transition-colors duration-fast ease-ui",
+                  active
+                    ? "bg-accent/15 font-semibold text-accent-text"
+                    : "text-muted hover:bg-hover/10 hover:text-fg",
                 )}
               >
-                <Icon className="size-5" aria-hidden="true" />
-                <span className={cn(active && "underline underline-offset-4")}>
-                  {t(item.labelKey)}
-                </span>
+                <Icon className="size-5 shrink-0" aria-hidden="true" />
+                <span className="max-w-full truncate">{t(item.labelKey)}</span>
               </NavLink>
             </li>
           );

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#000000" />
     <title>VietRP Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <script>
@@ -12,6 +13,8 @@
         var stored = localStorage.getItem("vietrp.theme");
         if (stored === "oled-neon" || stored === "e-ink") {
           document.documentElement.setAttribute("data-theme", stored);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", stored === "e-ink" ? "#FAF9F5" : "#000000");
         }
       } catch (_e) {
         /* storage unavailable: keep the default theme */

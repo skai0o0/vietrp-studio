@@ -130,22 +130,47 @@ def _system_layers(data: AssemblyInput, user_name: str) -> list[PromptLayer]:
         layers.append(PromptLayer("nsfw", "system", nsfw_text(data.preset, char=card.name, user=user_name)))
     before, after = order_by_position(data.lore)
     selected = DEFAULT_CARD_FIELDS if data.card_fields is None else set(data.card_fields)
-    card_text = render_prompt(
-        "_shared/card.j2", name=card.name, age=card.age, aliases=card.aliases, f=_card_view(card, selected)
+    card_text = substitute_placeholders(
+        render_prompt(
+            "_shared/card.j2",
+            name=card.name,
+            age=card.age,
+            aliases=card.aliases,
+            user_name=user_name,
+            f=_card_view(card, selected),
+        ),
+        char=card.name,
+        user=user_name,
     )
+    lore_before = substitute_placeholders(_lore_text(before), char=card.name, user=user_name)
+    lore_after = substitute_placeholders(_lore_text(after), char=card.name, user=user_name)
     candidates: list[tuple[str, str]] = [
-        ("lore_before", _lore_text(before)),
+        ("lore_before", lore_before),
         ("card", card_text),
-        ("lore_after", _lore_text(after)),
+        ("lore_after", lore_after),
     ]
     if data.persona is not None:
         persona_vars = data.persona.model_dump(exclude={"format", "spec_version"})
-        candidates.append(("persona", render_prompt("_shared/persona.j2", **persona_vars)))
+        persona_text = substitute_placeholders(
+            render_prompt("_shared/persona.j2", **persona_vars),
+            char=card.name,
+            user=user_name,
+        )
+        candidates.append(("persona", persona_text))
     if data.bonds:
         bonds = [{"pair": bond.pair, "fields": dict(bond.fields)} for bond in data.bonds]
-        candidates.append(("bonds", render_prompt("_shared/bonds.j2", bonds=bonds)))
+        bonds_text = substitute_placeholders(
+            render_prompt("_shared/bonds.j2", bonds=bonds),
+            char=card.name,
+            user=user_name,
+        )
+        candidates.append(("bonds", bonds_text))
     if data.summary.strip() or data.events:
-        memory = render_prompt("_shared/memory.j2", summary=data.summary.strip(), events=list(data.events))
+        memory = substitute_placeholders(
+            render_prompt("_shared/memory.j2", summary=data.summary.strip(), events=list(data.events)),
+            char=card.name,
+            user=user_name,
+        )
         candidates.append(("memory", memory))
     if data.command is not None and data.command.kind == "cmd" and data.command.instruction:
         instruction = substitute_placeholders(data.command.instruction, char=card.name, user=user_name)
@@ -181,11 +206,18 @@ def assemble(data: AssemblyInput) -> AssembledPrompt:
     def cost(text: str) -> int:
         return math.ceil((count_text(text) + overhead) * factor)
 
-    prefill = (data.prefill or "").strip()
+    raw_messages = [
+        HistoryMessage(
+            m.role,
+            substitute_placeholders(m.content, char=data.card.name, user=user_name),
+        )
+        for m in data.messages
+    ]
+    prefill = substitute_placeholders((data.prefill or "").strip(), char=data.card.name, user=user_name)
     fixed = sum(cost(layer.text) for layer in system_layers) + (cost(prefill) if prefill else 0)
     remaining = data.budget.prompt_budget - fixed
     kept: list[HistoryMessage] = []
-    for message in reversed(data.messages):
+    for message in reversed(raw_messages):
         message_cost = cost(message.content)
         # The newest message is always kept, even when it alone overflows the budget.
         if kept and message_cost > remaining:
@@ -210,6 +242,6 @@ def assemble(data: AssemblyInput) -> AssembledPrompt:
         messages=[{"role": layer.role, "content": layer.text} for layer in final_layers],
         layers=inspector,
         total_tokens=sum(cost(layer.text) for layer in final_layers),
-        history_dropped=len(data.messages) - len(kept),
+        history_dropped=len(raw_messages) - len(kept),
         over_budget=remaining < 0,
     )

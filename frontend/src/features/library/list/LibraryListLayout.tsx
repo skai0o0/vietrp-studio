@@ -1,12 +1,19 @@
 import { Plus, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { ItemCard, type LibraryItem } from "./ItemCard";
+
+const LIBRARY_TABS = [
+  { to: "/library/characters", labelKey: "pages.library.characters.title" },
+  { to: "/library/worlds", labelKey: "pages.library.worlds.title" },
+  { to: "/library/lorebooks", labelKey: "pages.library.lorebooks.title" },
+  { to: "/library/personas", labelKey: "pages.library.personas.title" },
+] as const;
 
 interface LibraryListLayoutProps {
   title: string;
@@ -49,6 +56,26 @@ export function LibraryListLayout(props: LibraryListLayoutProps) {
           </Button>
         </div>
       </header>
+
+      <nav
+        aria-label={t("library.list.navLabel")}
+        className="inline-flex w-fit max-w-full flex-wrap items-center gap-1 rounded-md border border-border bg-surface p-1"
+      >
+        {LIBRARY_TABS.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            className={({ isActive }) =>
+              cn(
+                "inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
+                isActive ? "bg-accent/15 text-fg" : "text-muted hover:text-fg",
+              )
+            }
+          >
+            {t(tab.labelKey)}
+          </NavLink>
+        ))}
+      </nav>
 
       <div className="relative">
         <Search

@@ -25,6 +25,7 @@ import {
   useSetActiveVariant,
   useSummarizeChat,
   useUndoChat,
+  useUpdateChat,
 } from "./hooks";
 import { MemorySection } from "./state/MemorySection";
 import { initialTurnState, reduceTurn, useChatStreamStore } from "./store";
@@ -1017,5 +1018,136 @@ describe("chat queries", () => {
     );
     expect(client.getQueryData<ChatOut>(chatKeys.detail("c_fork"))).toEqual(forked);
     expect(spy).toHaveBeenCalledWith({ queryKey: [...chatKeys.all, "list"] });
+  });
+
+  it("useUpdateChat applies optimistic cache update, rolls back on error, and invalidates prompt-preview", async () => {
+    const { client, wrapper, spy } = setup();
+    const initial = worldChatFixture();
+    client.setQueryData(chatKeys.detail(CHAT), initial);
+
+    let rejectRequest!: (reason?: unknown) => void;
+    const pendingPromise = new Promise<Response>((_res, rej) => {
+      rejectRequest = rej;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockReturnValueOnce(pendingPromise)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ...initial, persona_id: "p2" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useUpdateChat(CHAT), { wrapper });
+    let failPromise!: Promise<ChatOut>;
+    act(() => {
+      failPromise = result.current.mutateAsync({ persona_id: "p1" });
+    });
+
+    await waitFor(() =>
+      expect(client.getQueryData<ChatOut>(chatKeys.detail(CHAT))?.persona_id).toBe("p1"),
+    );
+    rejectRequest(new Error("boom"));
+    await expect(failPromise).rejects.toThrow("Network request failed");
+    expect(client.getQueryData<ChatOut>(chatKeys.detail(CHAT))?.persona_id).toBeNull();
+
+    await act(async () => {
+      await result.current.mutateAsync({ persona_id: "p2" });
+    });
+    expect(spy).toHaveBeenCalledWith({ queryKey: chatKeys.promptPreview(CHAT) });
+  });
+
+  it("useUndoChat clears SSE stream store overlay and invalidates derived caches", async () => {
+    const { wrapper, spy } = setup();
+    useChatStreamStore.setState({
+      turns: {
+        [CHAT]: {
+          ...initialTurnState,
+          status: "done",
+          buffer: "Bản cũ",
+          liveSummary: "Tóm tắt cũ",
+        },
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ removed_count: 2, chat: worldChatFixture() }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useUndoChat(CHAT), { wrapper });
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+
+    expect(useChatStreamStore.getState().turns[CHAT]).toBeUndefined();
+    expect(spy).toHaveBeenCalledWith({ queryKey: chatKeys.promptPreview(CHAT) });
+    expect(spy).toHaveBeenCalledWith({ queryKey: chatKeys.usage(CHAT) });
+  });
+
+  it("tracks monotonic errorNonce, clears optimisticUserMessage on finish, and supports partial clearLiveFields", () => {
+    useChatStreamStore.getState().begin(CHAT, "Xin chào Linh");
+    expect(useChatStreamStore.getState().turns[CHAT]?.optimisticUserMessage).toBe("Xin chào Linh");
+
+    useChatStreamStore.getState().fail(CHAT, "llm_failed");
+    expect(useChatStreamStore.getState().turns[CHAT]).toMatchObject({
+      status: "error",
+      errorCode: "llm_failed",
+      optimisticUserMessage: null,
+      errorNonce: 1,
+    });
+
+    useChatStreamStore.getState().begin(CHAT, "Thử lại");
+    useChatStreamStore.getState().apply(CHAT, { type: "error", code: "llm_failed" } as never);
+    expect(useChatStreamStore.getState().turns[CHAT]?.errorNonce).toBe(2);
+
+    useChatStreamStore.setState({
+      turns: {
+        [CHAT]: {
+          ...initialTurnState,
+          liveState: { time: "22:00" },
+          liveBonds: { "a:b": {} },
+          liveSummary: "Tóm tắt live",
+          archivistEventsAdded: 2,
+        },
+      },
+    });
+    useChatStreamStore.getState().clearLiveFields(CHAT, ["liveSummary"]);
+    const after = useChatStreamStore.getState().turns[CHAT];
+    expect(after?.liveSummary).toBeNull();
+    expect(after?.archivistEventsAdded).toBe(0);
+    expect(after?.liveState).toEqual({ time: "22:00" });
+    expect(after?.liveBonds).toEqual({ "a:b": {} });
+  });
+
+  it("merges SSE scene event into cached chat state", async () => {
+    const { client, wrapper } = setup();
+    client.setQueryData(chatKeys.detail(CHAT), worldChatFixture());
+    const mergedScene: SceneState = {
+      env: { weather: "gió lạnh" },
+      chars: { vy: { mood: "bình tĩnh" } },
+      items: ["ô"],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        sse([
+          { type: "scene", merged: mergedScene },
+          { type: "done", message_ids: [] },
+        ]),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useTurnStream(CHAT), { wrapper });
+    await act(async () => {
+      await result.current.send({ text: "Nhìn quanh" });
+    });
+
+    const cached = client.getQueryData<ChatOut>(chatKeys.detail(CHAT));
+    expect((cached?.state as WorldState | undefined)?.scene).toEqual(mergedScene);
   });
 });

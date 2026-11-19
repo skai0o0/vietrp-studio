@@ -45,11 +45,15 @@ vi.mock("../hooks", () => ({
     error: mocks.summarizeErrorObj,
   }),
   useUpdateChat: () => ({ mutate: mocks.updateChat, isError: false }),
+  useUndoChat: () => ({ mutate: vi.fn(), isPending: false }),
   useModels: () => ({ data: [], isError: false }),
 }));
 
 vi.mock("@/features/library/hooks", () => ({
   useWorld: () => ({ data: mocks.world }),
+  usePersonas: () => ({
+    data: [{ id: "p1", data: { name: "Nam" } }],
+  }),
   useLorebooks: () => ({
     isPending: false,
     isError: false,
@@ -125,6 +129,15 @@ function wrap(node: ReactNode) {
   );
 }
 
+function expandAccordion(title: string) {
+  const heading = screen.getByText(title);
+  const button = heading.closest("button");
+  if (!button) throw new Error(`Accordion button not found for: ${title}`);
+  if (button.getAttribute("aria-expanded") !== "true") {
+    fireEvent.click(button);
+  }
+}
+
 beforeEach(() => {
   mocks.patchState.mockReset();
   mocks.updateChat.mockReset();
@@ -164,7 +177,11 @@ describe("LiveStateEditor", () => {
       within(locationSelect).getByRole("option", { name: "Việt Nam › TP.HCM › Quán cà phê" }),
     ).toBeInTheDocument();
 
-    // Time field has a manual badge because state.manual includes "time".
+    // Expand Scene and Bonds sections to inspect manual badges and scene character visibility.
+    expandAccordion(t("stateEditor.scene.title"));
+    expandAccordion(t("stateEditor.bonds.title"));
+
+    // Time field and vy:user bond nickname have manual badges.
     expect(screen.getAllByText(t("stateEditor.manualBadge")).length).toBeGreaterThanOrEqual(2);
 
     // Structured state wins: Vy is present (rendered), Hân is absent (hidden).
@@ -205,6 +222,7 @@ describe("LiveStateEditor", () => {
 
   it("edits scene env, char fields, and items via usePatchState", async () => {
     wrap(<LiveStateEditor chat={mocks.chat!} />);
+    expandAccordion(t("stateEditor.scene.title"));
 
     await userEvent.type(
       screen.getByLabelText(t("stateEditor.scene.envKeyPlaceholder")),
@@ -250,6 +268,7 @@ describe("LiveStateEditor", () => {
 
   it("renders pinned and manual badges on bonds and saves edited fields", async () => {
     wrap(<LiveStateEditor chat={mocks.chat!} />);
+    expandAccordion(t("stateEditor.bonds.title"));
 
     const pairCard = screen.getByTestId("bond-pair-vy:user");
     expect(within(pairCard).getByText(t("stateEditor.bonds.pinnedBadge"))).toBeInTheDocument();
@@ -321,7 +340,13 @@ describe("LiveStateEditor", () => {
     });
     wrap(<LiveStateEditor chat={mocks.chat!} />);
     expect(screen.getByLabelText(t("stateEditor.structured.time"))).toHaveValue("21:00 Thứ Sáu");
+    expandAccordion(t("stateEditor.scene.title"));
     expect(screen.getByTestId("scene-char-vy")).toBeInTheDocument();
+    fireEvent.click(
+      within(
+        screen.getByRole("group", { name: t("stateEditor.scene.selectCharacter") }),
+      ).getByRole("button", { name: "Hân" }),
+    );
     expect(screen.getByTestId("scene-char-han")).toBeInTheDocument();
   });
 
@@ -343,6 +368,7 @@ describe("LiveStateEditor", () => {
     });
     wrap(<LiveStateEditor chat={mocks.chat!} />);
 
+    expandAccordion(t("stateEditor.memory.title"));
     expect(screen.getByText(t("stateEditor.memory.title"))).toBeInTheDocument();
     expect(
       screen.getByText(t("stateEditor.memory.compressedUpto", { seq: 6 })),
@@ -363,6 +389,7 @@ describe("LiveStateEditor", () => {
       ],
     });
     wrap(<LiveStateEditor chat={mocks.chat!} />);
+    expandAccordion(t("stateEditor.memory.title"));
 
     const summaryBox = screen.getByLabelText(t("stateEditor.memory.summaryLabel"));
     fireEvent.change(summaryBox, { target: { value: "Tóm tắt đã sửa" } });
@@ -374,7 +401,12 @@ describe("LiveStateEditor", () => {
       expect.any(Object),
     );
 
-    // Edit first event, remove second event, add a third event.
+    // Expand and edit first event, remove second event, toggle & add a third event.
+    await userEvent.click(
+      within(screen.getByTestId("memory-event-sk_one")).getByRole("button", {
+        name: "Sự kiện một",
+      }),
+    );
     fireEvent.change(screen.getByLabelText(t("stateEditor.memory.eventContentItem", { n: 1 })), {
       target: { value: "Nội dung một đã sửa" },
     });
@@ -382,6 +414,9 @@ describe("LiveStateEditor", () => {
       screen.getByRole("button", {
         name: t("stateEditor.memory.removeEvent", { title: "Sự kiện hai" }),
       }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: t("stateEditor.memory.addToggle") }),
     );
     await userEvent.type(
       screen.getByLabelText(t("stateEditor.memory.eventTitlePlaceholder")),
@@ -505,8 +540,9 @@ describe("ChatChrome, ChatSettingsPanel (world), and RecentChats", () => {
     );
     expect(screen.getByText(t("stateEditor.title"))).toBeInTheDocument();
 
-    // Switch to Settings tab and verify group write_mode + chain_max.
+    // Switch to Settings tab, expand Group accordion, and verify write_mode + chain_max.
     await userEvent.click(screen.getByRole("tab", { name: t("chatSettings.tabs.settings") }));
+    expandAccordion(t("chatSettings.group.title"));
     await waitFor(() =>
       expect(screen.getByLabelText(t("chatSettings.group.writeMode"))).toBeInTheDocument(),
     );
@@ -526,6 +562,7 @@ describe("ChatChrome, ChatSettingsPanel (world), and RecentChats", () => {
         </MemoryRouter>
       </QueryClientProvider>,
     );
+    expandAccordion(t("chatSettings.group.title"));
     fireEvent.change(screen.getByLabelText(t("chatSettings.group.chainMax")), {
       target: { value: "5" },
     });
@@ -536,7 +573,32 @@ describe("ChatChrome, ChatSettingsPanel (world), and RecentChats", () => {
     });
   });
 
-  it("renders world chat title and subtitle in RecentChats", () => {
+  it("renders single chat two-tab right sidebar (Phiên | Cài đặt)", async () => {
+    mocks.chat = {
+      ...makeWorldChat(),
+      id: "cs1",
+      mode: "single",
+      title: "Chat đơn",
+      character_name: "Vy",
+      state: { bonds: {}, summary: "", summary_upto: 0, events: [] },
+    };
+    wrap(<ChatChrome chatId="cs1" />);
+    const rightSlot = usePageChromeStore.getState().right;
+    expect(rightSlot).not.toBeNull();
+
+    wrap(<>{rightSlot}</>);
+    expect(screen.getByRole("tab", { name: t("chatSettings.tabs.session") })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByLabelText(t("chatSettings.persona.label"))).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("tab", { name: t("chatSettings.tabs.settings") }));
+    expect(screen.queryByLabelText(t("chatSettings.persona.label"))).toBeNull();
+    expect(screen.getByText(t("chatSettings.director.title"))).toBeInTheDocument();
+  });
+
+  it("renders world chat title and group-deduplicated subtitle in RecentChats", async () => {
     mocks.chats = [
       {
         id: "cw1",
@@ -552,6 +614,10 @@ describe("ChatChrome, ChatSettingsPanel (world), and RecentChats", () => {
     ];
     wrap(<RecentChats />);
     expect(screen.getByText("Cuộc hẹn cuối tuần")).toBeInTheDocument();
+    expect(screen.getByText("Sài Gòn Mưa")).toBeInTheDocument();
+    expect(screen.getByText(/7 tin nhắn/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: t("newChat.groupChats") }));
     expect(screen.getByText(/Sài Gòn Mưa · 7 tin nhắn/)).toBeInTheDocument();
   });
 });
@@ -564,6 +630,7 @@ describe("ChatSettingsPanel memory settings and single-chat MemorySection", () =
     // World chat ChatSettingsPanel does NOT duplicate MemorySection (it lives in LiveStateEditor).
     expect(screen.queryByText(t("stateEditor.memory.title"))).toBeNull();
     expect(screen.getByText(t("chatSettings.memory.title"))).toBeInTheDocument();
+    expandAccordion(t("chatSettings.memory.title"));
 
     fireEvent.change(screen.getByLabelText(t("chatSettings.memory.contextLength")), {
       target: { value: "32768" },
@@ -634,6 +701,7 @@ describe("ChatSettingsPanel memory settings and single-chat MemorySection", () =
     };
     wrap(<ChatSettingsPanel chatId="cs1" />);
 
+    expandAccordion(t("stateEditor.memory.title"));
     expect(screen.getByText(t("stateEditor.memory.title"))).toBeInTheDocument();
     expect(
       screen.getByText(t("stateEditor.memory.compressedUpto", { seq: 8 })),

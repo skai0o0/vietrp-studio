@@ -1,5 +1,5 @@
 import { t } from "@/i18n";
-import type { ChatSettings } from "@/types/chat";
+import type { ChatOut, ChatSettings } from "@/types/chat";
 import { useModels } from "../hooks";
 import { SelectField } from "./SelectField";
 
@@ -20,22 +20,38 @@ const DEFAULT_VALUE = "";
 
 interface AgentModelSelectsProps {
   models: AgentModels;
+  mode?: ChatOut["mode"];
+  embedded?: boolean;
   onChange: (models: AgentModels) => void;
 }
 
-export function AgentModelSelects({ models, onChange }: AgentModelSelectsProps) {
+export function AgentModelSelects({
+  models,
+  mode,
+  embedded = false,
+  onChange,
+}: AgentModelSelectsProps) {
   const query = useModels();
   const list = query.data ?? [];
-  const agents = Object.keys(AGENT_LABELS) as ModelAgent[];
+  const agents = (Object.keys(AGENT_LABELS) as ModelAgent[]).filter(
+    (agent) => !(mode === "single" && agent === "state_keeper"),
+  );
+
+  const Container = embedded ? "div" : "section";
 
   return (
-    <section className="flex flex-col gap-3" aria-labelledby="cs-models">
-      <h3 id="cs-models" className="text-sm font-semibold">
-        {t("chatSettings.models.title")}
-      </h3>
+    <Container
+      {...(!embedded ? { "aria-labelledby": "cs-models" } : {})}
+      className="flex flex-col gap-3"
+    >
+      {!embedded ? (
+        <h3 id="cs-models" className="text-sm font-semibold">
+          {t("chatSettings.models.title")}
+        </h3>
+      ) : null}
       <p className="text-xs text-muted">{t("chatSettings.models.hint")}</p>
       {query.isError ? (
-        <p className="text-xs text-danger">{t("chatSettings.models.loadFailed")}</p>
+        <p className="text-xs text-danger-text">{t("chatSettings.models.loadFailed")}</p>
       ) : null}
       {agents.map((agent) => {
         const current = models[agent] ?? DEFAULT_VALUE;
@@ -57,6 +73,6 @@ export function AgentModelSelects({ models, onChange }: AgentModelSelectsProps) 
           />
         );
       })}
-    </section>
+    </Container>
   );
 }

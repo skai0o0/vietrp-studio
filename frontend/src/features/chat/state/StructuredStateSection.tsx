@@ -1,8 +1,9 @@
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { flattenTree, pathLabel, type Loc } from "@/features/library/world/treeOps";
 import { t } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -17,6 +18,8 @@ interface StructuredStateSectionProps {
   silence: Record<string, number>;
   manualKeys: ReadonlySet<string>;
   pending: boolean;
+  embedded?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
   onSave: (patch: StatePatch) => void;
 }
 
@@ -29,6 +32,8 @@ export function StructuredStateSection({
   silence,
   manualKeys,
   pending,
+  embedded = false,
+  onDirtyChange,
   onSave,
 }: StructuredStateSectionProps) {
   const valueKey = JSON.stringify(value);
@@ -43,6 +48,11 @@ export function StructuredStateSection({
   }
 
   const diff = diffStructuredPatch(value, draft);
+  const isDirty = Boolean(diff);
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
   const locationOptions = flattenTree(locations).map(({ loc }) => ({
     value: loc.id,
     label: pathLabel(locations, loc.id),
@@ -59,25 +69,31 @@ export function StructuredStateSection({
     });
   }
 
+  const Container = embedded ? "div" : "section";
+
   return (
-    <section
-      aria-labelledby="state-structured-heading"
-      className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-3"
+    <Container
+      {...(!embedded ? { "aria-labelledby": "state-structured-heading" } : {})}
+      className={cn(
+        "flex flex-col gap-3",
+        !embedded && "rounded-lg border border-border bg-surface p-3",
+      )}
     >
-      <h3 id="state-structured-heading" className="text-sm font-semibold">
-        {t("stateEditor.structured.title")}
-      </h3>
+      {!embedded ? (
+        <h3 id="state-structured-heading" className="text-sm font-semibold">
+          {t("stateEditor.structured.title")}
+        </h3>
+      ) : null}
 
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-1">
           <Label htmlFor="state-location">{t("stateEditor.structured.location")}</Label>
           <ManualBadge visible={manualKeys.has("location_id")} />
         </div>
-        <select
+        <Select
           id="state-location"
           value={draft.location_id}
           onChange={(e) => updateDraft((p) => ({ ...p, location_id: e.target.value }))}
-          className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-fg"
         >
           {locationOptions.length === 0 ? (
             <option value="">{t("stateEditor.structured.noLocations")}</option>
@@ -87,7 +103,7 @@ export function StructuredStateSection({
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -108,18 +124,17 @@ export function StructuredStateSection({
           <Label htmlFor="state-tension">{t("stateEditor.structured.tension")}</Label>
           <ManualBadge visible={manualKeys.has("tension")} />
         </div>
-        <select
+        <Select
           id="state-tension"
           value={String(draft.tension)}
           onChange={(e) => updateDraft((p) => ({ ...p, tension: Number(e.target.value) }))}
-          className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-fg"
         >
           {TENSION_LEVELS.map((n) => (
             <option key={n} value={String(n)}>
               {t(`library.world.tension.${`t${n}` as TensionKey}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -132,7 +147,7 @@ export function StructuredStateSection({
         {cast.length === 0 ? (
           <p className="text-xs text-muted">{t("stateEditor.structured.emptyCast")}</p>
         ) : (
-          <div role="group" aria-labelledby="state-present-label" className="flex flex-wrap gap-2">
+          <div role="group" aria-labelledby="state-present-label" className="flex flex-wrap gap-1.5">
             {cast.map((m) => {
               const active = draft.present_ids.includes(m.id);
               const silentCount = silence[m.id] ?? 0;
@@ -141,18 +156,19 @@ export function StructuredStateSection({
                   key={m.id}
                   type="button"
                   aria-pressed={active}
+                  data-eink-active={active || undefined}
                   onClick={() => toggleListId("present_ids", m.id)}
                   className={cn(
-                    "inline-flex min-h-9 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium",
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors duration-fast ease-ui",
                     active
                       ? "border-accent bg-surface-2 text-fg"
-                      : "border-border bg-surface text-muted hover:text-fg",
+                      : "border-border bg-field text-muted hover:border-border-strong hover:text-fg",
                   )}
                 >
                   {active ? <Check className="size-3.5" aria-hidden="true" /> : null}
                   <span>{m.name}</span>
                   {silentCount > 0 ? (
-                    <span className="text-[11px] text-muted">
+                    <span className="text-2xs text-muted">
                       ({t("stateEditor.structured.silenceCount", { count: silentCount })})
                     </span>
                   ) : null}
@@ -173,7 +189,7 @@ export function StructuredStateSection({
         {cast.length === 0 ? (
           <p className="text-xs text-muted">{t("stateEditor.structured.emptyCast")}</p>
         ) : (
-          <div role="group" aria-labelledby="state-awaiting-label" className="flex flex-wrap gap-2">
+          <div role="group" aria-labelledby="state-awaiting-label" className="flex flex-wrap gap-1.5">
             {cast.map((m) => {
               const active = draft.awaiting_reply.includes(m.id);
               return (
@@ -181,12 +197,13 @@ export function StructuredStateSection({
                   key={m.id}
                   type="button"
                   aria-pressed={active}
+                  data-eink-active={active || undefined}
                   onClick={() => toggleListId("awaiting_reply", m.id)}
                   className={cn(
-                    "inline-flex min-h-9 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium",
+                    "inline-flex min-h-9 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors duration-fast ease-ui",
                     active
                       ? "border-accent-2 bg-surface-2 text-fg"
-                      : "border-border bg-surface text-muted hover:text-fg",
+                      : "border-border bg-field text-muted hover:border-border-strong hover:text-fg",
                   )}
                 >
                   {active ? <Check className="size-3.5" aria-hidden="true" /> : null}
@@ -208,6 +225,6 @@ export function StructuredStateSection({
       >
         {pending ? t("stateEditor.saving") : t("stateEditor.save")}
       </Button>
-    </section>
+    </Container>
   );
 }

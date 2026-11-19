@@ -33,7 +33,7 @@ Ví dụ lời thoại: {{ example }}
 Xưng hô thường ngày: {{ f.addressing.default }}
 {% endif %}
 {% if f.addressing.user %}
-Gọi người chơi là: {{ f.addressing.user }}
+Gọi {{ user_name or "người chơi" }} là: {{ f.addressing.user }}
 {% endif %}
 {% for other, how in f.addressing.by_character.items() %}
 Gọi {{ other }} là: {{ how }}
@@ -41,7 +41,7 @@ Gọi {{ other }} là: {{ how }}
 {% endif %}
 {% if f.relationships %}
 {% if f.relationships.user %}
-Quan hệ với người chơi: {{ f.relationships.user }}
+Quan hệ với {{ user_name or "người chơi" }}: {{ f.relationships.user }}
 {% endif %}
 {% for other, how in f.relationships.by_character.items() %}
 Quan hệ với {{ other }}: {{ how }}

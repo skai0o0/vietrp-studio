@@ -9,15 +9,22 @@ interface ReasoningBlockProps {
   thinking?: boolean;
   /** Saved reasoning of a finished message: no timer, collapsed by default. */
   saved?: boolean;
+  /** Director rewrite attempt counter; changing resets the thinking timer cleanly. */
+  attempt?: number;
 }
 
 const TICK_MS = 1000;
 
-function useThinkingSeconds(thinking: boolean, active: boolean): number {
+function useThinkingSeconds(thinking: boolean, active: boolean, attempt: number): number {
   const startRef = useRef<number | null>(null);
+  const prevAttemptRef = useRef<number>(attempt);
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
+    if (prevAttemptRef.current !== attempt) {
+      prevAttemptRef.current = attempt;
+      startRef.current = null;
+    }
     if (!active) return;
     if (startRef.current === null) startRef.current = Date.now();
     const start = startRef.current;
@@ -26,18 +33,31 @@ function useThinkingSeconds(thinking: boolean, active: boolean): number {
     if (!thinking) return;
     const id = window.setInterval(update, TICK_MS);
     return () => window.clearInterval(id);
-  }, [thinking, active]);
+  }, [thinking, active, attempt]);
 
   return seconds;
 }
 
 /** Collapsible "thinking" block above a reply. Open while the model thinks, closes when the reply starts. */
-export function ReasoningBlock({ text, thinking = false, saved = false }: ReasoningBlockProps) {
+export function ReasoningBlock({
+  text,
+  thinking = false,
+  saved = false,
+  attempt = 0,
+}: ReasoningBlockProps) {
   const [userOpen, setUserOpen] = useState<boolean | null>(null);
-  const seconds = useThinkingSeconds(thinking, !saved && text !== "");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const seconds = useThinkingSeconds(thinking, !saved && text !== "", attempt);
+  const open = userOpen ?? thinking;
+
+  useEffect(() => {
+    if (thinking && open && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [text, thinking, open]);
+
   if (text.trim() === "") return null;
 
-  const open = userOpen ?? thinking;
   let label = t("chat.reasoning.saved");
   if (!saved) {
     label = thinking
@@ -60,14 +80,17 @@ export function ReasoningBlock({ text, thinking = false, saved = false }: Reason
         <span>{label}</span>
         <ChevronDown
           className={cn(
-            "size-3.5 transition-transform motion-reduce:transition-none",
+            "size-3.5 transition-transform duration-fast ease-ui motion-reduce:transition-none",
             open && "rotate-180",
           )}
           aria-hidden="true"
         />
       </button>
       {open ? (
-        <div className="mt-1.5 max-h-60 overflow-y-auto whitespace-pre-wrap border-l-2 border-border pl-2.5 text-left text-xs leading-relaxed text-muted">
+        <div
+          ref={scrollRef}
+          className="mt-1.5 max-h-60 overflow-y-auto whitespace-pre-wrap border-l-2 border-border pl-2.5 text-left text-xs leading-relaxed text-muted"
+        >
           {text}
         </div>
       ) : null}

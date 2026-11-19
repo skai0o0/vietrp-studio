@@ -651,21 +651,42 @@ class ChatService:
     async def update(self, vault_id: uuid.UUID, chat_id: uuid.UUID, body: ChatUpdate) -> ChatOut:
         fields: dict[str, Any] = {}
         async with self._uow() as r:
+            chat = await r.chats.get(vault_id, chat_id)
+            if chat is None:
+                raise chat_not_found()
             if body.title is not None:
                 fields["title"] = body.title
             if body.settings is not None:
                 fields["settings"] = body.settings.model_dump(mode="json")
-            if body.persona_id is not None:
-                try:
-                    persona_id = uuid.UUID(body.persona_id)
-                except ValueError as exc:
-                    raise AppError("not_found", "Persona not found", 404) from exc
-                if await r.library.personas.get(vault_id, persona_id) is None:
-                    raise AppError("not_found", "Persona not found", 404)
-                fields["persona_id"] = persona_id
+            if "persona_id" in body.model_fields_set:
+                if body.persona_id is None:
+                    fields["persona_id"] = None
+                    new_user_name = FALLBACK_USER_NAME
+                else:
+                    try:
+                        persona_id = uuid.UUID(body.persona_id)
+                    except ValueError as exc:
+                        raise AppError("not_found", "Persona not found", 404) from exc
+                    persona_row = await r.library.personas.get(vault_id, persona_id)
+                    if persona_row is None:
+                        raise AppError("not_found", "Persona not found", 404)
+                    fields["persona_id"] = persona_id
+                    new_user_name = Persona.model_validate(persona_row.data).name
+                raw_bonds = chat.state.get("bonds") if isinstance(chat.state, dict) else None
+                if isinstance(raw_bonds, dict) and any(str(pid).endswith(":user") for pid in raw_bonds):
+                    next_state = copy.deepcopy(chat.state)
+                    next_bonds = dict(next_state.get("bonds") or {})
+                    for pid, rec in next_bonds.items():
+                        if not str(pid).endswith(":user") or not isinstance(rec, dict):
+                            continue
+                        old_label = str(rec.get("label") or "")
+                        char_prefix = old_label.partition(" ↔ ")[0].strip() if " ↔ " in old_label else ""
+                        if char_prefix:
+                            next_bonds[pid] = {**rec, "label": f"{char_prefix} ↔ {new_user_name}"}
+                    next_state["bonds"] = next_bonds
+                    fields["state"] = next_state
             updated = await r.chats.update(vault_id, chat_id, fields)
-            if updated is None:
-                raise chat_not_found()
+            assert updated is not None
             await r.commit()
         return to_chat_out(updated)
 

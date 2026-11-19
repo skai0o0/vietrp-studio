@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { t } from "@/i18n";
 import { PresetEditor } from "@/features/settings/presets/PresetEditor";
+import { AgentModelSelects } from "./AgentModelSelects";
 import { ChatSettingsPanel } from "./ChatSettingsPanel";
 
 const mocks = vi.hoisted(() => ({ update: vi.fn(), save: vi.fn() }));
@@ -20,6 +21,15 @@ vi.mock("@/features/chat/hooks", () => ({
   useModels: () => ({
     isError: false,
     data: [{ id: "m/one", name: "Model One", context_length: 1000 }],
+  }),
+}));
+
+vi.mock("@/features/library/hooks", () => ({
+  usePersonas: () => ({
+    data: [
+      { id: "p1", data: { name: "Minh" } },
+      { id: "p2", data: { name: "An" } },
+    ],
   }),
 }));
 
@@ -61,16 +71,46 @@ describe("ChatSettingsPanel", () => {
 
   it("sets a per-agent model and clears it back to default (null)", () => {
     wrap(<ChatSettingsPanel chatId="c1" />);
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(t("chatSettings.models.title")) }));
     fireEvent.change(screen.getByLabelText(t("chatSettings.agents.writer")), {
       target: { value: "m/one" },
     });
     expect(mocks.update.mock.calls[0]?.[0].settings.models).toEqual({ writer: "m/one" });
+  });
+
+  it("hides State Keeper model selector in single chat mode", () => {
+    const { rerender } = wrap(<AgentModelSelects mode="single" models={{}} onChange={vi.fn()} />);
+    expect(screen.queryByLabelText(t("chatSettings.agents.state_keeper"))).toBeNull();
+    expect(screen.getByLabelText(t("chatSettings.agents.writer"))).toBeInTheDocument();
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <AgentModelSelects mode="world" models={{}} onChange={vi.fn()} />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByLabelText(t("chatSettings.agents.state_keeper"))).toBeInTheDocument();
+  });
+
+  it("changes and clears the active persona from chat settings", () => {
+    wrap(<ChatSettingsPanel chatId="c1" />);
+    const select = screen.getByLabelText(t("chatSettings.persona.label"));
+    fireEvent.change(select, { target: { value: "p2" } });
+    expect(mocks.update).toHaveBeenCalledWith({ persona_id: "p2" });
+    fireEvent.change(select, { target: { value: "" } });
+    expect(mocks.update).toHaveBeenLastCalledWith({ persona_id: null });
+    expect(screen.getByRole("link", { name: t("chatSettings.persona.createLink") })).toHaveAttribute(
+      "href",
+      "/library/personas/new",
+    );
   });
 });
 
 describe("ChatSettingsPanel lorebooks", () => {
   it("starts from the card's lorebooks and saves a chat-only list", () => {
     wrap(<ChatSettingsPanel chatId="c1" />);
+    fireEvent.click(
+      screen.getByRole("button", { name: new RegExp(t("chatSettings.lorebook.title")) }),
+    );
     expect(screen.getByText(t("chatSettings.lorebook.booksDefault"))).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "picker:lb-card" }));
     expect(mocks.update.mock.calls[0]?.[0].settings.lorebook).toEqual({

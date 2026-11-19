@@ -139,14 +139,16 @@ def _card_view(card: VietrpCard, selected: Collection[str]) -> dict[str, Any]:
     return view
 
 
-def _render_card(card: VietrpCard, selected: Collection[str]) -> str:
-    return render_prompt(
+def _render_card(card: VietrpCard, selected: Collection[str], user_name: str) -> str:
+    rendered = render_prompt(
         "_shared/card.j2",
         name=card.name,
         age=card.age,
         aliases=card.aliases,
+        user_name=user_name,
         f=_card_view(card, selected),
     )
+    return substitute_placeholders(rendered, char=card.name, user=user_name)
 
 
 def _lore_text(hits: Sequence[LoreHit]) -> str:
@@ -197,18 +199,19 @@ def _card_layer_text(
     mode: Literal["narrator", "single_call", "character"],
     cast_by_id: dict[str, WorldCastEntry],
     relevant_entries: Sequence[WorldCastEntry],
+    user_name: str,
 ) -> str:
     if mode == "character":
         selected = DEFAULT_CARD_FIELDS if data.card_fields is None else set(data.card_fields)
-        return _render_card(cast_by_id[data.speaker_id].card, selected)
+        return _render_card(cast_by_id[data.speaker_id].card, selected, user_name)
     if mode == "narrator":
         selected = NARRATOR_CARD_FIELDS if data.card_fields is None else set(data.card_fields)
-        return "\n\n".join(_render_card(entry.card, selected) for entry in relevant_entries)
+        return "\n\n".join(_render_card(entry.card, selected, user_name) for entry in relevant_entries)
     selected = DEFAULT_CARD_FIELDS if data.card_fields is None else set(data.card_fields)
     entries = list(relevant_entries)
     if data.speaker_id in cast_by_id and all(e.id != data.speaker_id for e in entries):
         entries.append(cast_by_id[data.speaker_id])
-    return "\n\n".join(_render_card(entry.card, selected) for entry in entries)
+    return "\n\n".join(_render_card(entry.card, selected, user_name) for entry in entries)
 
 
 def _system_layers(data: WorldAssemblyInput, user_name: str) -> list[PromptLayer]:
@@ -233,29 +236,32 @@ def _system_layers(data: WorldAssemblyInput, user_name: str) -> list[PromptLayer
 
     candidates: list[tuple[str, str]] = []
     if data.world.rules.strip():
-        candidates.append(
-            ("world_rules", render_prompt("_shared/world_rules.j2", world_name=data.world.name, rules=data.world.rules))
+        rules_text = substitute_placeholders(
+            render_prompt("_shared/world_rules.j2", world_name=data.world.name, rules=data.world.rules),
+            char=char_label,
+            user=user_name,
         )
+        candidates.append(("world_rules", rules_text))
 
     loc_by_id = {loc.id: loc for loc in data.world.locations}
     current_loc = loc_by_id.get(data.location_id)
     loc_desc = current_loc.description.strip() if current_loc is not None else ""
     visible = visible_scene(data.scene, data.present_ids) if data.scene is not None else None
     char_names = {entry.id: entry.card.name for entry in data.cast}
-    candidates.append(
-        (
-            "location_path",
-            render_prompt(
-                "_shared/location_path.j2",
-                path=location_path(data.world.locations, data.location_id),
-                location_description=loc_desc,
-                time=data.time.strip(),
-                tension=max(0, min(4, data.tension)),
-                scene=visible,
-                char_names=char_names,
-            ),
-        )
+    location_text = substitute_placeholders(
+        render_prompt(
+            "_shared/location_path.j2",
+            path=location_path(data.world.locations, data.location_id),
+            location_description=loc_desc,
+            time=data.time.strip(),
+            tension=max(0, min(4, data.tension)),
+            scene=visible,
+            char_names=char_names,
+        ),
+        char=char_label,
+        user=user_name,
     )
+    candidates.append(("location_path", location_text))
 
     candidates.append(
         (
@@ -271,22 +277,30 @@ def _system_layers(data: WorldAssemblyInput, user_name: str) -> list[PromptLayer
     )
 
     before, after = order_by_position(data.lore)
-    candidates.append(("lore_before", _lore_text(before)))
-    candidates.append(("card", _card_layer_text(data, mode, cast_by_id, relevant_entries)))
-    candidates.append(("lore_after", _lore_text(after)))
+    candidates.append(("lore_before", substitute_placeholders(_lore_text(before), char=char_label, user=user_name)))
+    candidates.append(("card", _card_layer_text(data, mode, cast_by_id, relevant_entries, user_name)))
+    candidates.append(("lore_after", substitute_placeholders(_lore_text(after), char=char_label, user=user_name)))
 
-    persona_block = _persona_text(data, user_name)
+    persona_block = substitute_placeholders(_persona_text(data, user_name), char=char_label, user=user_name)
     if persona_block:
         candidates.append(("persona", persona_block))
 
     if data.bonds:
         bonds = [{"pair": bond.pair, "fields": dict(bond.fields)} for bond in data.bonds]
-        candidates.append(("bonds", render_prompt("_shared/bonds.j2", bonds=bonds)))
+        bonds_text = substitute_placeholders(
+            render_prompt("_shared/bonds.j2", bonds=bonds),
+            char=char_label,
+            user=user_name,
+        )
+        candidates.append(("bonds", bonds_text))
 
     if data.summary.strip() or data.events:
-        candidates.append(
-            ("memory", render_prompt("_shared/memory.j2", summary=data.summary.strip(), events=list(data.events)))
+        memory_text = substitute_placeholders(
+            render_prompt("_shared/memory.j2", summary=data.summary.strip(), events=list(data.events)),
+            char=char_label,
+            user=user_name,
         )
+        candidates.append(("memory", memory_text))
 
     if data.command is not None and data.command.kind == "cmd" and data.command.instruction:
         instruction = substitute_placeholders(data.command.instruction, char=char_label, user=user_name)
@@ -345,11 +359,27 @@ def assemble_world(data: WorldAssemblyInput) -> AssembledPrompt:
     def cost(text: str) -> int:
         return math.ceil((count_text(text) + overhead) * factor)
 
-    prefill = (data.prefill or "").strip()
+    cast_by_id = {entry.id: entry for entry in data.cast}
+    mode = _resolve_role(data, cast_by_id)
+    if mode == "character":
+        history_char_label = cast_by_id[data.speaker_id].card.name
+    else:
+        present_set = set(data.present_ids)
+        relevant = [entry for entry in data.cast if entry.id in present_set]
+        history_char_label = ", ".join(entry.card.name for entry in relevant) or data.world.name
+
+    raw_messages = [
+        HistoryMessage(
+            m.role,
+            substitute_placeholders(m.content, char=history_char_label, user=user_name),
+        )
+        for m in data.messages
+    ]
+    prefill = substitute_placeholders((data.prefill or "").strip(), char=history_char_label, user=user_name)
     fixed = sum(cost(layer.text) for layer in system_layers) + (cost(prefill) if prefill else 0)
     remaining = data.budget.prompt_budget - fixed
     kept: list[HistoryMessage] = []
-    for message in reversed(data.messages):
+    for message in reversed(raw_messages):
         message_cost = cost(message.content)
         # The newest message is always kept, even when it alone overflows the budget.
         if kept and message_cost > remaining:
@@ -374,6 +404,6 @@ def assemble_world(data: WorldAssemblyInput) -> AssembledPrompt:
         messages=[{"role": layer.role, "content": layer.text} for layer in final_layers],
         layers=inspector,
         total_tokens=sum(cost(layer.text) for layer in final_layers),
-        history_dropped=len(data.messages) - len(kept),
+        history_dropped=len(raw_messages) - len(kept),
         over_budget=remaining < 0,
     )

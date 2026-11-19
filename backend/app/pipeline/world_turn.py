@@ -58,7 +58,7 @@ from app.pipeline.single_turn import (
 )
 from app.pipeline.state_commands import STATE_COMMAND_KINDS, execute_state_command, npcs_from_state
 from app.pipeline.world_assembly import WorldAssemblyInput, WorldCastEntry, assemble_world
-from app.prompts.presets import PresetLayers
+from app.prompts.presets import PresetLayers, substitute_placeholders
 from app.repositories.messages_repo import MessageRecord, NewVariant, VariantRecord
 from app.schemas.chat import ChatSettings, GroupWriteMode
 from app.schemas.events import (
@@ -911,7 +911,12 @@ async def _world_turn(deps: WorldTurnDeps, inp: TurnInput, cancel: Any) -> Async
 
     has_prior_user_history = any(m.speaker == USER_SPEAKER for m in history_records)
     user_seq = seq
-    user_text = parsed.message
+    char_label = (
+        ", ".join(cast_by_id[cid].card.name for cid in world_state.present_ids if cid in cast_by_id)
+        or ", ".join(entry.card.name for entry in ctx.cast)
+        or ctx.world.name
+    )
+    user_text = substitute_placeholders(parsed.message, char=char_label, user=user_name)
     if not inp.is_continue and regen_target is None and user_text.strip():
         user_id = uuid.uuid4()
         await store.add_message(

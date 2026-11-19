@@ -6,6 +6,7 @@ import type { NoticeEvent } from "@/types/chat";
 interface NoticeListProps {
   notices: readonly NoticeEvent[];
   errorCode: string | null;
+  errorNonce?: number;
 }
 
 const DETAIL_NOTICE_CODES = new Set([
@@ -44,16 +45,17 @@ function chatErrorText(code: string): string {
   return lookupText("errors", code) ?? errorMessage(code);
 }
 
-/** Small inline toasts under the messages. Each can be dismissed. */
-export function NoticeList({ notices, errorCode }: NoticeListProps) {
+/** Pinned inline status/error strip above the chat input. Each item can be dismissed. */
+export function NoticeList({ notices, errorCode, errorNonce = 0 }: NoticeListProps) {
   const [dismissedNotices, setDismissedNotices] = useState<ReadonlySet<NoticeEvent>>(
     () => new Set(),
   );
-  const [prevErrorCode, setPrevErrorCode] = useState<string | null>(errorCode);
+  const errorKey = `${errorCode ?? ""}:${errorNonce}`;
+  const [prevErrorKey, setPrevErrorKey] = useState<string>(errorKey);
   const [dismissedError, setDismissedError] = useState(false);
 
-  if (errorCode !== prevErrorCode) {
-    setPrevErrorCode(errorCode);
+  if (errorKey !== prevErrorKey) {
+    setPrevErrorKey(errorKey);
     setDismissedError(false);
   }
 
@@ -69,7 +71,7 @@ export function NoticeList({ notices, errorCode }: NoticeListProps) {
     errorCode && !dismissedError
       ? [
           {
-            id: `e:${errorCode}`,
+            id: `e:${errorKey}`,
             text: chatErrorText(errorCode),
             error: true as const,
             dismiss: () => setDismissedError(true),
@@ -79,25 +81,27 @@ export function NoticeList({ notices, errorCode }: NoticeListProps) {
   const items = [...noticeItems, ...errorItems];
   if (items.length === 0) return null;
   return (
-    <ul className="flex flex-col items-center gap-1" aria-label={t("chat.stream.error")}>
-      {items.map((item) => (
-        <li
-          key={item.id}
-          role={item.error ? "alert" : "status"}
-          className="flex max-w-full items-center gap-2 rounded-md border border-border bg-surface-2 px-3 py-1 text-xs text-muted data-[error=true]:border-danger data-[error=true]:text-danger"
-          data-error={item.error}
-        >
-          <span className="min-w-0">{item.text}</span>
-          <button
-            type="button"
-            aria-label={t("chat.stream.dismiss")}
-            onClick={item.dismiss}
-            className="rounded-sm p-0.5 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+    <div className="mx-auto w-full max-w-3xl px-3 pb-2 md:px-6">
+      <ul className="flex flex-col items-stretch gap-1" aria-label={t("chat.stream.noticesLabel")}>
+        {items.map((item) => (
+          <li
+            key={item.id}
+            role={item.error ? "alert" : "status"}
+            className="flex max-w-full items-center justify-between gap-2 rounded-md border border-border bg-surface-2 px-3 py-1.5 text-xs text-muted data-[error=true]:border-danger data-[error=true]:text-danger-text"
+            data-error={item.error}
           >
-            <X className="size-3" aria-hidden="true" />
-          </button>
-        </li>
-      ))}
-    </ul>
+            <span className="min-w-0 break-words">{item.text}</span>
+            <button
+              type="button"
+              aria-label={t("chat.stream.dismiss")}
+              onClick={item.dismiss}
+              className="shrink-0 rounded-sm p-0.5 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

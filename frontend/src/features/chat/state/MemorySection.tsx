@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Archive, Check, Loader2, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, Archive, Check, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { errorMessage, t, type MessageKey } from "@/i18n";
 import { ApiError } from "@/lib/apiClient";
 import { cn } from "@/lib/cn";
@@ -25,6 +26,8 @@ export interface MemorySectionProps {
   pending?: boolean;
   isManualSummary?: boolean;
   isManualEvents?: boolean;
+  embedded?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
   onSaveSummary: (summary: string) => void;
   onSaveEvents: (events: MemorableEventItem[]) => void;
 }
@@ -117,9 +120,6 @@ function resolveSummarizeError(err: unknown): string {
   return errorMessage(code);
 }
 
-const textareaClass =
-  "w-full min-w-0 resize-y rounded-md border border-border bg-surface px-3 py-2 text-xs text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50";
-
 /** Reusable memory panel: manual Archivist compression, editable summary, and up to 24 memorable events. */
 export function MemorySection({
   chatId,
@@ -130,6 +130,8 @@ export function MemorySection({
   pending = false,
   isManualSummary = false,
   isManualEvents = false,
+  embedded = false,
+  onDirtyChange,
   onSaveSummary,
   onSaveEvents,
 }: MemorySectionProps) {
@@ -145,6 +147,8 @@ export function MemorySection({
     key: string;
     value: MemorableEventItem[];
   } | null>(null);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
 
@@ -155,6 +159,11 @@ export function MemorySection({
 
   const summaryDirty = draftSummary !== summary;
   const eventsDirty = JSON.stringify(draftEvents) !== eventsKey;
+  const anyDirty = summaryDirty || eventsDirty;
+  useEffect(() => {
+    onDirtyChange?.(anyDirty);
+  }, [anyDirty, onDirtyChange]);
+
   const isBusy = Boolean(pending || isStreaming || summarize.isPending);
   const summarizeDisabled = Boolean(isStreaming || summarize.isPending);
   const canAddEvent =
@@ -195,19 +204,32 @@ export function MemorySection({
     updateEvents((prev) => [...prev, { id, title, content }]);
     setNewTitle("");
     setNewContent("");
+    setAddOpen(false);
+    setExpandedEventId(id);
   }
 
+  const Container = embedded ? "div" : "section";
+
   return (
-    <section
-      aria-labelledby="state-memory-heading"
-      className="flex flex-col gap-4 rounded-lg border border-border bg-bg p-3"
+    <Container
+      {...(!embedded ? { "aria-labelledby": "state-memory-heading" } : {})}
+      className={cn(
+        "flex flex-col gap-4",
+        !embedded && "rounded-lg border border-border bg-surface p-3",
+      )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id="state-memory-heading" className="text-sm font-semibold">
-          {t("stateEditor.memory.title")}
-        </h3>
+        {!embedded ? (
+          <h3 id="state-memory-heading" className="text-sm font-semibold">
+            {t("stateEditor.memory.title")}
+          </h3>
+        ) : (
+          <span className="text-xs font-medium text-muted">
+            {t("stateEditor.memory.summaryLabel")}
+          </span>
+        )}
         {summaryUpto > 0 ? (
-          <span className="inline-flex items-center gap-1 rounded-sm border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-fg">
+          <span className="inline-flex items-center gap-1 rounded-sm border border-border bg-surface-2 px-2 py-0.5 text-2xs font-medium text-fg">
             <Archive className="size-3 shrink-0" aria-hidden="true" />
             {t("stateEditor.memory.compressedUpto", { seq: summaryUpto })}
           </span>
@@ -234,7 +256,7 @@ export function MemorySection({
         </Button>
 
         {summarizeSuccess && !summarize.isError ? (
-          <p role="status" className="flex items-center gap-1.5 text-xs text-accent-2">
+          <p role="status" className="flex items-center gap-1.5 text-xs text-accent-text">
             <Check className="size-3.5 shrink-0" aria-hidden="true" />
             <span>{t("stateEditor.memory.summarizeSuccess")}</span>
           </p>
@@ -243,7 +265,7 @@ export function MemorySection({
         {summarize.isError ? (
           <p
             role="alert"
-            className="flex items-start gap-1.5 rounded-md border border-danger bg-surface p-2 text-xs text-danger"
+            className="flex items-start gap-1.5 rounded-md border border-danger bg-surface-2 p-2 text-xs text-danger-text"
           >
             <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
             <span className="min-w-0 break-words">{resolveSummarizeError(summarize.error)}</span>
@@ -256,14 +278,14 @@ export function MemorySection({
           <Label htmlFor={`memory-summary-${chatId}`}>{t("stateEditor.memory.summaryLabel")}</Label>
           <ManualBadge visible={isManualSummary} />
         </div>
-        <textarea
+        <Textarea
           id={`memory-summary-${chatId}`}
           rows={4}
           value={draftSummary}
           disabled={isBusy}
           placeholder={t("stateEditor.memory.summaryPlaceholder")}
           onChange={(e) => setSummaryOverride({ key: summary, value: e.target.value })}
-          className={textareaClass}
+          className="text-xs md:text-xs"
         />
         <Button
           type="button"
@@ -276,13 +298,13 @@ export function MemorySection({
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 border-t border-border-subtle pt-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <h4 className="text-xs font-semibold uppercase text-muted">
               {t("stateEditor.memory.eventsTitle")}
             </h4>
-            <span className="rounded-sm border border-border bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-muted">
+            <span className="rounded-sm border border-border bg-surface-2 px-1.5 py-0.5 text-2xs font-medium text-muted">
               {t("stateEditor.memory.eventsCount", {
                 count: draftEvents.length,
                 max: MAX_MEMORABLE_EVENTS,
@@ -295,45 +317,67 @@ export function MemorySection({
         {draftEvents.length === 0 ? (
           <p className="text-xs text-muted">{t("stateEditor.memory.eventsEmpty")}</p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {draftEvents.map((ev, idx) => (
-              <li
-                key={ev.id}
-                data-testid={`memory-event-${ev.id}`}
-                className="flex flex-col gap-2 rounded-md border border-border bg-surface p-2.5"
-              >
-                <div className="flex items-center gap-2">
-                  <Input
-                    aria-label={t("stateEditor.memory.eventTitleItem", { n: idx + 1 })}
-                    value={ev.title}
-                    disabled={isBusy}
-                    onChange={(e) => updateEventField(idx, "title", e.target.value)}
-                    className="h-9 min-w-0 flex-1 bg-bg text-xs font-medium"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-9 shrink-0"
-                    disabled={isBusy}
-                    aria-label={t("stateEditor.memory.removeEvent", {
-                      title: ev.title || String(idx + 1),
-                    })}
-                    onClick={() => updateEvents((prev) => prev.filter((_, i) => i !== idx))}
-                  >
-                    <Trash2 aria-hidden="true" />
-                  </Button>
-                </div>
-                <textarea
-                  aria-label={t("stateEditor.memory.eventContentItem", { n: idx + 1 })}
-                  rows={2}
-                  value={ev.content}
-                  disabled={isBusy}
-                  onChange={(e) => updateEventField(idx, "content", e.target.value)}
-                  className={cn(textareaClass, "bg-bg")}
-                />
-              </li>
-            ))}
+          <ul className="flex flex-col divide-y divide-border-subtle">
+            {draftEvents.map((ev, idx) => {
+              const expanded = expandedEventId === ev.id;
+              return (
+                <li
+                  key={ev.id}
+                  data-testid={`memory-event-${ev.id}`}
+                  className="flex flex-col py-1"
+                >
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-expanded={expanded}
+                      onClick={() => setExpandedEventId(expanded ? null : ev.id)}
+                      className="flex min-h-9 min-w-0 flex-1 items-center gap-1.5 rounded px-1 text-left text-xs font-medium text-fg hover:bg-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                    >
+                      <ChevronRight
+                        className={cn(
+                          "size-3.5 shrink-0 text-muted transition-transform duration-fast ease-ui motion-reduce:transition-none",
+                          expanded && "rotate-90 text-fg",
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{ev.title}</span>
+                    </button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="shrink-0"
+                      disabled={isBusy}
+                      aria-label={t("stateEditor.memory.removeEvent", {
+                        title: ev.title || String(idx + 1),
+                      })}
+                      onClick={() => updateEvents((prev) => prev.filter((_, i) => i !== idx))}
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </Button>
+                  </div>
+                  {expanded ? (
+                    <div className="flex flex-col gap-2 pb-2 pl-5 pt-1">
+                      <Input
+                        aria-label={t("stateEditor.memory.eventTitleItem", { n: idx + 1 })}
+                        value={ev.title}
+                        disabled={isBusy}
+                        onChange={(e) => updateEventField(idx, "title", e.target.value)}
+                        className="h-9 text-xs font-medium md:h-9"
+                      />
+                      <Textarea
+                        aria-label={t("stateEditor.memory.eventContentItem", { n: idx + 1 })}
+                        rows={2}
+                        value={ev.content}
+                        disabled={isBusy}
+                        onChange={(e) => updateEventField(idx, "content", e.target.value)}
+                        className="text-xs md:text-xs"
+                      />
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         )}
 
@@ -342,35 +386,50 @@ export function MemorySection({
             {t("stateEditor.memory.maxEventsReached", { max: MAX_MEMORABLE_EVENTS })}
           </p>
         ) : (
-          <div className="flex flex-col gap-2 rounded-md border border-border bg-surface p-2.5">
-            <Input
-              aria-label={t("stateEditor.memory.eventTitlePlaceholder")}
-              placeholder={t("stateEditor.memory.eventTitlePlaceholder")}
-              value={newTitle}
-              disabled={isBusy}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="h-9 bg-bg text-xs"
-            />
-            <textarea
-              aria-label={t("stateEditor.memory.eventContentPlaceholder")}
-              placeholder={t("stateEditor.memory.eventContentPlaceholder")}
-              rows={2}
-              value={newContent}
-              disabled={isBusy}
-              onChange={(e) => setNewContent(e.target.value)}
-              className={cn(textareaClass, "bg-bg")}
-            />
+          <div className="flex flex-col gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               className="w-full"
-              disabled={!canAddEvent}
-              onClick={handleAddEvent}
+              disabled={isBusy}
+              aria-expanded={addOpen}
+              onClick={() => setAddOpen((v) => !v)}
             >
-              <Plus className="size-4" aria-hidden="true" />
-              {t("stateEditor.memory.addEvent")}
+              {addOpen ? t("stateEditor.memory.cancelAdd") : t("stateEditor.memory.addToggle")}
             </Button>
+            {addOpen ? (
+              <div className="flex flex-col gap-2 border-l-2 border-accent/40 pl-2.5">
+                <Input
+                  aria-label={t("stateEditor.memory.eventTitlePlaceholder")}
+                  placeholder={t("stateEditor.memory.eventTitlePlaceholder")}
+                  value={newTitle}
+                  disabled={isBusy}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="h-9 text-xs md:h-9"
+                />
+                <Textarea
+                  aria-label={t("stateEditor.memory.eventContentPlaceholder")}
+                  placeholder={t("stateEditor.memory.eventContentPlaceholder")}
+                  rows={2}
+                  value={newContent}
+                  disabled={isBusy}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  className="text-xs md:text-xs"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  disabled={!canAddEvent}
+                  onClick={handleAddEvent}
+                >
+                  <Plus className="size-4" aria-hidden="true" />
+                  {t("stateEditor.memory.addEvent")}
+                </Button>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -384,6 +443,6 @@ export function MemorySection({
           {pending ? t("stateEditor.saving") : t("stateEditor.memory.saveEvents")}
         </Button>
       </div>
-    </section>
+    </Container>
   );
 }

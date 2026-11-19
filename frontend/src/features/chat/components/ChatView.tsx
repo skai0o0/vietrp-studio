@@ -1,19 +1,16 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GitBranch } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import * as libraryHooks from "@/features/library/hooks";
 import { t } from "@/i18n";
 import { ApiError } from "@/lib/apiClient";
-import {
-  useChat,
-  useChatMessages,
-  useDeleteMessage,
-  useEditMessage,
-  useForkChat,
-  useSetActiveVariant,
-  useUndoChat,
-} from "../hooks";
+import type { PersonaOut } from "@/types/library";
+import { chatApi } from "../api";
+import * as chatHooks from "../hooks";
 import { WorldPromptInspector } from "../state/WorldPromptInspector";
 import { useTurnStream } from "../useTurnStream";
+import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { MessageList } from "./MessageList";
 import { NoticeList } from "./NoticeList";
@@ -25,25 +22,62 @@ interface ChatViewProps {
   chatId: string;
 }
 
+function resolveOptionalHook<T>(getter: () => T, fallback: T): T {
+  try {
+    const candidate = getter();
+    return typeof candidate === "function" ? candidate : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function useFallbackPersonas(): { data?: PersonaOut[] } {
+  return { data: [] };
+}
+
+function useFallbackSummarizeChat(id: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => chatApi.summarize(id),
+    onSuccess: (chat) => {
+      client.setQueryData(["chats", "detail", id], chat);
+      void client.invalidateQueries({ queryKey: ["chats", "messages", id] });
+    },
+  });
+}
+
+const useResolvedPersonas = resolveOptionalHook<() => { data?: PersonaOut[] }>(
+  () => libraryHooks.usePersonas,
+  useFallbackPersonas,
+);
+
+const useResolvedSummarizeChat = resolveOptionalHook(
+  () => chatHooks.useSummarizeChat,
+  useFallbackSummarizeChat,
+);
+
 function errorCodeFrom(error: unknown): string {
   return error instanceof ApiError ? error.code : "unknown";
 }
 
-/** Chat screen: message list, in-flight turn, notices, input with token bar, Prompt Inspector. */
+/** Chat screen: sticky header, message list, in-flight turn, pinned notices, input with token bar, Prompt Inspector. */
 export function ChatView({ chatId }: ChatViewProps) {
   const navigate = useNavigate();
-  const chat = useChat(chatId);
-  const messages = useChatMessages(chatId);
+  const chat = chatHooks.useChat(chatId);
+  const messages = chatHooks.useChatMessages(chatId);
+  const personas = useResolvedPersonas();
   const { turn, isStreaming, send, continueTurn, regenerate, stop } = useTurnStream(chatId);
-  const setActiveVariant = useSetActiveVariant(chatId);
-  const editMessage = useEditMessage(chatId);
-  const deleteMessage = useDeleteMessage(chatId);
-  const undoChat = useUndoChat(chatId);
-  const forkChat = useForkChat(chatId);
+  const setActiveVariant = chatHooks.useSetActiveVariant(chatId);
+  const editMessage = chatHooks.useEditMessage(chatId);
+  const deleteMessage = chatHooks.useDeleteMessage(chatId);
+  const undoChat = chatHooks.useUndoChat(chatId);
+  const forkChat = chatHooks.useForkChat(chatId);
+  const summarizeChat = useResolvedSummarizeChat(chatId);
   const [draftText, setDraftText] = useState("");
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionErrorNonce, setActionErrorNonce] = useState(0);
   const isWorld = chat.data?.mode === "world";
   const defaultSpeaker =
     chat.data?.settings.group?.write_mode === "single_call"
@@ -53,7 +87,7 @@ export function ChatView({ chatId }: ChatViewProps) {
   const preview = usePromptPreview(chatId, draftText, isWorld ? previewSpeaker : undefined);
 
   if (chat.isError || messages.isError) {
-    return <p className="p-6 text-center text-sm text-danger">{t("chat.page.loadFailed")}</p>;
+    return <p className="p-6 text-center text-sm text-danger-text">{t("chat.page.loadFailed")}</p>;
   }
   if (!chat.data) {
     return <p className="p-6 text-center text-sm text-muted">{t("chat.page.loading")}</p>;
@@ -62,13 +96,30 @@ export function ChatView({ chatId }: ChatViewProps) {
   const holdUntilApproved = chat.data.settings.director?.stream_mode === "hold_until_approved";
   const list = messages.data ?? [];
   const cast = chat.data.cast;
+  const personaName = chat.data.persona_id
+    ? (personas.data?.find((p) => p.id === chat.data.persona_id)?.data.name ?? chat.data.persona_id)
+    : null;
+  const rawState = (chat.data.state ?? {}) as Record<string, unknown>;
+  const summaryUpto = typeof rawState.summary_upto === "number" ? rawState.summary_upto : 0;
+
   const isActionPending =
     setActiveVariant.isPending ||
     editMessage.isPending ||
     deleteMessage.isPending ||
     undoChat.isPending ||
-    forkChat.isPending;
+    forkChat.isPending ||
+    summarizeChat.isPending;
   const canUndo = list.some((m) => m.seq >= 1);
+
+  function recordError(error: unknown) {
+    setActionError(errorCodeFrom(error));
+    setActionErrorNonce((n) => n + 1);
+  }
+
+  function openInspector() {
+    setInspectorOpen(true);
+    void preview.refetch?.();
+  }
 
   async function handleSelectVariant(messageId: string, variantIdx: number) {
     setActionError(null);
@@ -76,7 +127,7 @@ export function ChatView({ chatId }: ChatViewProps) {
       await setActiveVariant.mutateAsync({ messageId, variantIdx });
       return true;
     } catch (error) {
-      setActionError(errorCodeFrom(error));
+      recordError(error);
       return false;
     }
   }
@@ -87,7 +138,7 @@ export function ChatView({ chatId }: ChatViewProps) {
       await editMessage.mutateAsync({ messageId, content });
       return true;
     } catch (error) {
-      setActionError(errorCodeFrom(error));
+      recordError(error);
       return false;
     }
   }
@@ -98,7 +149,7 @@ export function ChatView({ chatId }: ChatViewProps) {
       await deleteMessage.mutateAsync(messageId);
       return true;
     } catch (error) {
-      setActionError(errorCodeFrom(error));
+      recordError(error);
       return false;
     }
   }
@@ -108,7 +159,16 @@ export function ChatView({ chatId }: ChatViewProps) {
     try {
       await undoChat.mutateAsync();
     } catch (error) {
-      setActionError(errorCodeFrom(error));
+      recordError(error);
+    }
+  }
+
+  async function handleSummarize() {
+    setActionError(null);
+    try {
+      await summarizeChat.mutateAsync();
+    } catch (error) {
+      recordError(error);
     }
   }
 
@@ -118,21 +178,30 @@ export function ChatView({ chatId }: ChatViewProps) {
       const forked = await forkChat.mutateAsync({ message_id: messageId, upto_seq: seq });
       navigate(`/chat/${forked.id}`);
     } catch (error) {
-      setActionError(errorCodeFrom(error));
+      recordError(error);
     }
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-bg">
+      <ChatHeader
+        chat={chat.data}
+        personaName={personaName}
+        isStreaming={isStreaming}
+        canUndo={canUndo}
+        onOpenInspector={openInspector}
+        onSummarize={() => void handleSummarize()}
+        onUndo={() => void handleUndo()}
+      />
       {chat.data.parent_chat_id ? (
-        <div className="flex items-center gap-2 border-b border-border bg-surface px-3 py-1.5 text-xs text-muted md:px-6">
+        <div className="flex items-center gap-2 border-b border-border-subtle bg-surface px-3 py-1.5 text-xs text-muted md:px-6">
           <GitBranch className="size-3.5 shrink-0 text-accent-2" aria-hidden="true" />
           <span className="truncate">
             {t("chat.message.forkedAt", { seq: chat.data.forked_at_seq ?? 0 })}
           </span>
           <Link
             to={`/chat/${chat.data.parent_chat_id}`}
-            className="ml-auto shrink-0 text-accent-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            className="link-inline ml-auto shrink-0 text-accent-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {t("chat.message.forkParentLink")}
           </Link>
@@ -144,7 +213,9 @@ export function ChatView({ chatId }: ChatViewProps) {
         avatarUrl={chat.data.avatar_url}
         cast={cast}
         worldName={chat.data.world_name ?? undefined}
-        scrollKey={`${list.length}:${turn.speakerOrder.length}:${turn.buffer.length}:${turn.status}`}
+        summaryUpto={summaryUpto}
+        optimisticUserMessage={turn.optimisticUserMessage}
+        scrollKey={`${list.length}:${turn.speakerOrder.length}:${turn.buffer.length}:${turn.status}:${turn.optimisticUserMessage ?? ""}`}
         actionsDisabled={isStreaming || isActionPending}
         onSelectVariant={handleSelectVariant}
         onRegenerate={(messageId) => {
@@ -156,9 +227,14 @@ export function ChatView({ chatId }: ChatViewProps) {
         onForkMessage={handleFork}
       >
         <StreamingBubble turn={turn} holdUntilApproved={holdUntilApproved} cast={cast} />
-        <NoticeList notices={turn.notices} errorCode={turn.errorCode ?? actionError} />
       </MessageList>
+      <NoticeList
+        notices={turn.notices}
+        errorCode={turn.errorCode ?? actionError}
+        errorNonce={actionError ? actionErrorNonce : turn.errorNonce}
+      />
       <ChatInput
+        mode={chat.data.mode}
         isStreaming={isStreaming}
         usedTokens={preview.data?.total_tokens ?? null}
         budget={preview.data?.budget ?? null}
@@ -175,7 +251,7 @@ export function ChatView({ chatId }: ChatViewProps) {
         canUndo={canUndo}
         isActionPending={isActionPending}
         onStop={() => void stop()}
-        onOpenInspector={() => setInspectorOpen(true)}
+        onOpenInspector={openInspector}
         onTextChange={setDraftText}
       />
       {isWorld ? (

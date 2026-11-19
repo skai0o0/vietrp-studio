@@ -374,3 +374,72 @@ def test_safety_injected_when_minor_absent_but_in_single_call_safety_cast_ids() 
         )
     )
     _assert_rule_last_system(prompt.messages, ["Tuấn"])
+
+
+def test_world_substitutes_placeholders_and_keeps_minor_rule_last() -> None:
+    from uuid import uuid4
+
+    from app.formats.card import VietrpCard
+    from app.formats.lorebook import LorebookEntry
+    from app.formats.persona import Persona
+    from app.formats.world import Location, VietrpWorld
+    from app.pipeline.lorebook import LoreHit
+    from app.pipeline.prompt_assembler import HistoryMessage
+    from app.pipeline.world_assembly import WorldAssemblyInput, WorldCastEntry, assemble_world
+
+    world = VietrpWorld(
+        name="Phố Mưa",
+        rules="{{user}} và {{char}} không được tiết lộ thân phận.",
+        locations=[
+            Location(
+                id="quan",
+                level="place",
+                name="Quán của {{char}}",
+                description="Góc bàn quen thuộc của {{user}}.",
+            )
+        ],
+    )
+    card = VietrpCard(
+        name="Vy",
+        age=16,
+        personality="{{char}} luôn để ý tới {{user}}.",
+    )
+    prompt = assemble_world(
+        WorldAssemblyInput(
+            world=world,
+            cast=[WorldCastEntry(id="vy", card=card)],
+            present_ids=["vy"],
+            speaker_id="vy",
+            location_id="quan",
+            player_role="{{user}} là đồng nghiệp mới của {{char}}.",
+            persona=Persona(name="Nam", age=20),
+            lore=[
+                LoreHit(
+                    book_id=uuid4(),
+                    entry=LorebookEntry(
+                        id="ky_uc",
+                        title="Lời hứa",
+                        position="before_char",
+                        content="{{char}} giữ bí mật cùng {{user}}.",
+                    ),
+                    tokens=10,
+                    reason="constant",
+                )
+            ],
+            messages=[HistoryMessage("user", "{{user}} chào {{char}}")],
+            prefill="{{char}} quay sang {{user}}:",
+            model="m/x",
+            nsfw=True,
+        )
+    )
+    rendered = "\n".join(layer.text for layer in prompt.layers)
+    assert "{{user}}" not in rendered
+    assert "{{char}}" not in rendered
+    assert "Nam và Vy không được tiết lộ thân phận." in rendered
+    assert "Quán của Vy" in rendered
+    assert "Góc bàn quen thuộc của Nam." in rendered
+    assert "Nam là đồng nghiệp mới của Vy." in rendered
+    assert "Vy giữ bí mật cùng Nam." in rendered
+    assert prompt.messages[-2]["content"] == "Nam chào Vy"
+    assert prompt.messages[-1] == {"role": "assistant", "content": "Vy quay sang Nam:"}
+    _assert_rule_last_system(prompt.messages, ["Vy"])
